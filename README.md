@@ -66,10 +66,10 @@ CloudFront will serve the content securely over HTTPS.
 
 ## Project Challenges
 
-# Configuring Multi-Environment Setup: 
+**Configuring Multi-Environment Setup:** 
 Setting up test and prod environments required careful planning to avoid conflicts and ensure the infrastructure could be managed independently.
 
-## Automating Infrastructure with Terraform: 
+**Automating Infrastructure with Terraform:**
 Learning how to organize Terraform code in modules and use it effectively for both environments was a key challenge.
 
 ## Setting Up GitHub Actions CI/CD: 
