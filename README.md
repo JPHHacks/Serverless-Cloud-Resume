@@ -40,24 +40,24 @@ You can view the live resume here: https://jpheymann.com
 ## Setup Instructions
 **Clone the repository:**
 
-git clone https://github.com/JPHHacks/aws-cloud-resume.git
+`git clone https://github.com/JPHHacks/aws-cloud-resume.git`
 
 **Navigate to the Terraform directory:**
 
-cd terraform/environments/test
+`cd terraform/environments/test`
 
 **Initialize Terraform:**
 
-terraform init
+`terraform init`
 
 **Apply Terraform for the test environment**
 
-terraform apply -var-file=test.tfvars
+`terraform apply -var-file=test.tfvars`
 
 **Repeat the above steps for the prod environment if needed**
 
-cd ../prod
-terraform apply -var-file=prod.tfvars
+`cd ../prod`
+`terraform apply -var-file=prod.tfvars`
 
 **Website Deployment:**
 
