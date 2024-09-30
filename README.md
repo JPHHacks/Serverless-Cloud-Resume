@@ -78,6 +78,8 @@ Automating the deployment process using GitHub Actions required understanding ho
 ## Future Improvements
 
 **Add Unit Tests: For Lambda functions to ensure visitor counting works as expected.**
+
 **Enhanced Monitoring: Integrate AWS CloudWatch to monitor errors and performance metrics.**
+
 **Security Enhancements: Implement AWS WAF (Web Application Firewall) for additional security.**
 
