@@ -1,7 +1,11 @@
-# Cloud Resume Challenge - [Jean Paul Heymann]
+# Cloud Resume Challenge - Jean Paul Heymann
 
 ## Project Overview
 This project is my implementation of the Cloud Resume Challenge, a hands-on project designed to showcase cloud skills, particularly with AWS. The challenge involves creating a resume website and deploying it using various cloud services.
+
+## Live Site
+
+You can view the live resume here: https://jpheymann.com
 
 ## Architecture
 
@@ -62,9 +66,14 @@ CloudFront will serve the content securely over HTTPS.
 
 ## Project Challenges
 
-## Configuring Multi-Environment Setup: Setting up test and prod environments required careful planning to avoid conflicts and ensure the infrastructure could be managed independently.
-## Automating Infrastructure with Terraform: Learning how to organize Terraform code in modules and use it effectively for both environments was a key challenge.
-## Setting Up GitHub Actions CI/CD: Automating the deployment process using GitHub Actions required understanding how to trigger the Terraform apply on code pushes, as well as syncing the static website files with the S3 bucket.
+## Configuring Multi-Environment Setup: 
+Setting up test and prod environments required careful planning to avoid conflicts and ensure the infrastructure could be managed independently.
+
+## Automating Infrastructure with Terraform: 
+Learning how to organize Terraform code in modules and use it effectively for both environments was a key challenge.
+
+## Setting Up GitHub Actions CI/CD: 
+Automating the deployment process using GitHub Actions required understanding how to trigger the Terraform apply on code pushes, as well as syncing the static website files with the S3 bucket.
 
 ## Future Improvements
 
