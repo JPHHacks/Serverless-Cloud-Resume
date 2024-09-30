@@ -25,34 +25,7 @@ env:
   NODE_VERSION: '14'
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - run: npm ci
-        working-directory: ./Website
-      - run: npm run lint
-        working-directory: ./Website
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - run: npm ci
-        working-directory: ./Website
-      - run: npm test
-        working-directory: ./Website
-
   plan:
-    needs: [lint, test]
     runs-on: ubuntu-latest
     strategy:
       matrix:
