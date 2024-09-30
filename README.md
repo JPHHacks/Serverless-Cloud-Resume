@@ -38,28 +38,28 @@ You can view the live resume here: https://jpheymann.com
    - Any push to the main branch triggers the workflow, which runs the Terraform commands to update AWS infrastructure.
 
 ## Setup Instructions
-## Clone the repository:
+**Clone the repository:**
 
 git clone https://github.com/JPHHacks/aws-cloud-resume.git
 
-## Navigate to the Terraform directory:
+**Navigate to the Terraform directory:**
 
 cd terraform/environments/test
 
-## Initialize Terraform:
+**Initialize Terraform:**
 
 terraform init
 
-## Apply Terraform for the test environment:
+**Apply Terraform for the test environment**
 
 terraform apply -var-file=test.tfvars
 
-## Repeat the above steps for the prod environment if needed:
+**Repeat the above steps for the prod environment if needed**
 
 cd ../prod
 terraform apply -var-file=prod.tfvars
 
-## Website Deployment:
+**Website Deployment:**
 
 The website files in the Website/ folder can be deployed to the S3 bucket created by Terraform.
 CloudFront will serve the content securely over HTTPS.
@@ -72,7 +72,7 @@ Setting up test and prod environments required careful planning to avoid conflic
 **Automating Infrastructure with Terraform:**
 Learning how to organize Terraform code in modules and use it effectively for both environments was a key challenge.
 
-## Setting Up GitHub Actions CI/CD: 
+**Setting Up GitHub Actions CI/CD:**
 Automating the deployment process using GitHub Actions required understanding how to trigger the Terraform apply on code pushes, as well as syncing the static website files with the S3 bucket.
 
 ## Future Improvements
