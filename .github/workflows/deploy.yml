@@ -50,7 +50,7 @@ jobs:
         working-directory: ./terraform/environments/${{ matrix.environment }}
 
       - name: Terraform Plan
-        run: terraform plan -var-file=variables.tf -out=tfplan
+        run: terraform plan -var-file=${{ matrix.environment }}.tfvars -out=tfplan
         working-directory: ./terraform/environments/${{ matrix.environment }}
 
       - name: Upload Terraform Plan
@@ -120,18 +120,3 @@ jobs:
           DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)
           aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
         working-directory: ./terraform/environments/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
-
-  notify:
-    needs: deploy
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Notify Slack
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          text: Deployment to ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }} ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
