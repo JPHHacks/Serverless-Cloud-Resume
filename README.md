@@ -4,7 +4,7 @@
 This project is my implementation of the Cloud Resume Challenge, a hands-on project designed to showcase cloud skills, particularly with AWS. The challenge involves creating a resume website and deploying it using various cloud services.
 
 ## Architecture
-[Include a diagram or description of your architecture here]
+
 
 ## Technologies Used
 - Frontend: HTML, CSS, JavaScript
