@@ -46,11 +46,16 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ matrix.environment }}/terraform.tfstate" \
+            -backend-config="region=${{ secrets.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
         working-directory: ./terraform/environments/${{ matrix.environment }}
 
       - name: Terraform Plan
-        run: terraform plan -var-file=${{ matrix.environment }}.tfvars -out=tfplan
+        run: terraform plan -out=tfplan
         working-directory: ./terraform/environments/${{ matrix.environment }}
 
       - name: Upload Terraform Plan
@@ -81,7 +86,12 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}/terraform.tfstate" \
+            -backend-config="region=${{ secrets.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
         working-directory: ./terraform/environments/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
 
       - name: Download Terraform Plan
