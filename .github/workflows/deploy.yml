@@ -55,7 +55,12 @@ jobs:
         working-directory: ./terraform/environments/${{ matrix.environment }}
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        run: |
+          terraform plan \
+            -var="environment=${{ matrix.environment }}" \
+            -var="custom_domain=${{ secrets.CUSTOM_DOMAIN }}" \
+            -var="aws_account_id=${{ secrets[format('AWS_ACCOUNT_ID_{0}', upper(matrix.environment))] }}" \
+            -out=tfplan
         working-directory: ./terraform/environments/${{ matrix.environment }}
 
       - name: Upload Terraform Plan
@@ -101,7 +106,13 @@ jobs:
           path: terraform/environments/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: |
+          terraform apply \
+            -auto-approve \
+            -var="environment=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}" \
+            -var="custom_domain=${{ secrets.CUSTOM_DOMAIN }}" \
+            -var="aws_account_id=${{ secrets[format('AWS_ACCOUNT_ID_{0}', github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'PROD' || 'TEST'))] }}" \
+            tfplan
         working-directory: ./terraform/environments/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
 
       - name: Setup Node.js
@@ -130,3 +141,5 @@ jobs:
           DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)
           aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
         working-directory: ./terraform/environments/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
+```
+</rewritten_file>
