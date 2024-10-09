@@ -77,8 +77,11 @@ You can view the live resume here: https://jpheymann.com
 **4. For production deployment:**
 
    Commit and push your changes to the main branch
+   
    `git add .`
+   
    `git commit -m "Description of changes"`
+   
    `git push origin main`
 
    This will trigger the GitHub Actions workflow for deployment
