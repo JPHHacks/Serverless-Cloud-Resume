@@ -86,9 +86,7 @@ You can view the live resume here: https://jpheymann.com
 
    This will trigger the GitHub Actions workflow for deployment
 
-**5. Monitor the GitHub Actions workflow in the repository's Actions tab**
 
-**6. After deployment, verify changes in AWS Console for both test and prod environments**
 
 ## Website Deployment
 
