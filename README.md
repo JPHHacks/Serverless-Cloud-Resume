@@ -42,8 +42,8 @@ You can view the live resume here: https://jpheymann.com
 ## Setup Instructions
 
 **1. Clone the repository:**
-   git clone https://github.com/JPHHacks/aws-cloud-resume.git
-   cd aws-cloud-resume
+   `git clone https://github.com/JPHHacks/aws-cloud-resume.git`
+   `cd aws-cloud-resume`
 
 **2. Set up AWS CLI with SSO (if not already configured):**
    `aws configure sso`
