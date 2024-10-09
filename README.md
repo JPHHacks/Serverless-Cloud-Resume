@@ -45,7 +45,6 @@ You can view the live resume here: https://jpheymann.com
 
    `git clone https://github.com/JPHHacks/Serverless-Cloud-Resume.git`
    
-   `cd Serverless-Cloud-Resume`
 
 **2. Set up AWS CLI with SSO (if not already configured):**
 
