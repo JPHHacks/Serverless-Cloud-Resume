@@ -40,28 +40,47 @@ You can view the live resume here: https://jpheymann.com
    - Any push to the main branch triggers the workflow, which runs the Terraform commands to update AWS infrastructure.
 
 ## Setup Instructions
-**Clone the repository:**
 
-`git clone https://github.com/JPHHacks/aws-cloud-resume.git`
+**1. Clone the repository:**
+   git clone https://github.com/JPHHacks/aws-cloud-resume.git
+   cd aws-cloud-resume
 
-**Navigate to the Terraform directory:**
+**2. Set up AWS CLI with SSO (if not already configured):**
+   aws configure sso
+   # Follow the prompts to set up SSO for your AWS accounts
 
-`cd terraform/environments/test`
+**3. For local development and testing (test environment only):**
+   
+   # Switch to the test environment directory
+   cd terraform/environments/test
+   
+   # Log in to AWS SSO for the test account
+   aws sso login --profile test-profile
+   
+   # Initialize Terraform (create a backend.hcl file with non-sensitive config)
+   terraform init -backend-config=backend.hcl
+   
+   # Plan Terraform changes
+   terraform plan -out=tfplan
+   
+   # Review the plan carefully
+   
+   # Apply changes (only for test environment)
+   terraform apply tfplan
 
-**Initialize Terraform:**
+**4. For production deployment:**
+   # Commit and push your changes to the main branch
+   git add .
+   git commit -m "Description of changes"
+   git push origin main
 
-`terraform init`
+   # This will trigger the GitHub Actions workflow for deployment
 
-**Apply Terraform for the test environment**
+**5. Monitor the GitHub Actions workflow in the repository's Actions tab**
 
-`terraform apply -var-file=test.tfvars`
+**6. After deployment, verify changes in AWS Console for both test and prod environments**
 
-**Repeat the above steps for the prod environment if needed**
-
-`cd ../prod`
-`terraform apply -var-file=prod.tfvars`
-
-**Website Deployment:**
+## Website Deployment
 
 The website files in the Website/ folder can be deployed to the S3 bucket created by Terraform.
 CloudFront will serve the content securely over HTTPS.
