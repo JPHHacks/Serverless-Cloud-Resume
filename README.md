@@ -42,33 +42,40 @@ You can view the live resume here: https://jpheymann.com
 ## Setup Instructions
 
 **1. Clone the repository:**
+
    `git clone https://github.com/JPHHacks/aws-cloud-resume.git`
    `cd aws-cloud-resume`
 
 **2. Set up AWS CLI with SSO (if not already configured):**
+
    `aws configure sso`
+   
    Follow the prompts to set up SSO for your AWS accounts
 
 **3. For local development and testing (test environment only):**
    
    Switch to the test environment directory
+   
    `cd terraform/environments/test`
    
    Log in to AWS SSO for the test account
+   
    `aws sso login --profile test-profile`
    
    Initialize Terraform (create a backend.hcl file with non-sensitive config)
+   
    `terraform init -backend-config=backend.hcl`
    
    Plan Terraform changes
+   
    `terraform plan -out=tfplan`
    
-   Review the plan carefully
-   
    Apply changes (only for test environment)
+   
    `terraform apply tfplan`
 
 **4. For production deployment:**
+
    Commit and push your changes to the main branch
    `git add .`
    `git commit -m "Description of changes"`
