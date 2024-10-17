@@ -8,6 +8,8 @@ This project is my implementation of the Cloud Resume Challenge, a hands-on proj
 You can view the live resume here: https://jpheymann.com
 
 ## Architecture
+![Terraform](https://github.com/user-attachments/assets/4a639474-7184-47f7-93a5-5fb99ec84668)
+
 
 
 ## Technologies Used
@@ -38,28 +40,55 @@ You can view the live resume here: https://jpheymann.com
    - Any push to the main branch triggers the workflow, which runs the Terraform commands to update AWS infrastructure.
 
 ## Setup Instructions
-**Clone the repository:**
 
-`git clone https://github.com/JPHHacks/aws-cloud-resume.git`
+**1. Clone the repository:**
 
-**Navigate to the Terraform directory:**
+   `git clone https://github.com/JPHHacks/Serverless-Cloud-Resume.git`
+   
 
-`cd terraform/environments/test`
+**2. Set up AWS CLI with SSO (if not already configured):**
 
-**Initialize Terraform:**
+   `aws configure sso`
+   
+   Follow the prompts to set up SSO for your AWS accounts
 
-`terraform init`
+**3. For local development and testing (test environment only):**
+   
+   Switch to the test environment directory
+   
+   `cd terraform/environments/test`
+   
+   Log in to AWS SSO for the test account
+   
+   `aws sso login --profile test-profile`
+   
+   Initialize Terraform (create a backend.hcl file with non-sensitive config)
+   
+   `terraform init -backend-config=backend.hcl`
+   
+   Plan Terraform changes
+   
+   `terraform plan -out=tfplan`
+   
+   Apply changes (only for test environment)
+   
+   `terraform apply tfplan`
 
-**Apply Terraform for the test environment**
+**4. For production deployment:**
 
-`terraform apply -var-file=test.tfvars`
+   Commit and push your changes to the main branch
+   
+   `git add .`
+   
+   `git commit -m "Description of changes"`
+   
+   `git push origin main`
 
-**Repeat the above steps for the prod environment if needed**
+   This will trigger the GitHub Actions workflow for deployment
 
-`cd ../prod`
-`terraform apply -var-file=prod.tfvars`
 
-**Website Deployment:**
+
+## Website Deployment
 
 The website files in the Website/ folder can be deployed to the S3 bucket created by Terraform.
 CloudFront will serve the content securely over HTTPS.
@@ -76,8 +105,6 @@ Learning how to organize Terraform code in modules and use it effectively for bo
 Automating the deployment process using GitHub Actions required understanding how to trigger the Terraform apply on code pushes, as well as syncing the static website files with the S3 bucket.
 
 ## Future Improvements
-
-**Add Unit Tests: For Lambda functions to ensure visitor counting works as expected.**
 
 **Enhanced Monitoring: Integrate AWS CloudWatch to monitor errors and performance metrics.**
 
