@@ -1,6 +1,6 @@
 module "s3_website" {
   source      = "../../modules/s3_website"
-  bucket_name = "jpheymannweb"
+  bucket_name = "jpheymannweb-prod"
   environment = "prod"
 }
 
