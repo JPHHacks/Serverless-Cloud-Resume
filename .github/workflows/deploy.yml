@@ -1,27 +1,22 @@
-name: Deploy Infrastructure and Website
+name: Test Infrastructure Setup
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger only for now
     inputs:
       environment:
-        description: 'Environment to deploy to'
+        description: 'Test infrastructure setup'
         required: true
-        default: 'test'
+        default: 'prod'
         type: choice
-        options: [test, prod]
+        options: [prod]
 
 env:
   TF_VERSION: '1.5.0'
-  NODE_VERSION: '14'
 
 jobs:
-  deploy:
+  plan:  # Changed from deploy to plan
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
+    environment: prod
     
     steps:
       - uses: actions/checkout@v3
@@ -29,8 +24,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets[format('AWS_ACCESS_KEY_ID_{0}', github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'PROD' || 'TEST'))] }}
-          aws-secret-access-key: ${{ secrets[format('AWS_SECRET_ACCESS_KEY_{0}', github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'PROD' || 'TEST'))] }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Setup Terraform
@@ -42,25 +37,15 @@ jobs:
         run: |
           terraform init \
             -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-            -backend-config="key=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}/terraform.tfstate" \
+            -backend-config="key=prod/terraform.tfstate" \
             -backend-config="region=${{ secrets.AWS_REGION }}" \
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
-        working-directory: ./terraform/env/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
+        working-directory: ./terraform/env/prod
 
-      - name: Terraform Apply
+      - name: Terraform Plan  # Changed from apply to plan
         run: |
-          terraform apply -auto-approve \
-            -var="environment=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}" \
-            -var="domain_name=${{ secrets.DOMAIN_NAME }}" \
-            -var="bucket_name=${{ secrets.BUCKET_NAME }}" \
+          terraform plan \
+            -var="environment=prod" \
             -var="lambda_function_name=${{ secrets.LAMBDA_FUNCTION_NAME }}" \
             -var="dynamodb_table_name=${{ secrets.DYNAMODB_TABLE_NAME }}"
-        working-directory: ./terraform/env/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
-
-      - name: Deploy Website
-        run: |
-          BUCKET_NAME=$(terraform output -raw website_bucket_name)
-          aws s3 sync ./Website/ s3://$BUCKET_NAME --delete
-          DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)
-          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
-        working-directory: ./terraform/env/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
+        working-directory: ./terraform/env/prod
