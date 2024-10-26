@@ -2,13 +2,9 @@ name: Deploy Infrastructure and Website
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   workflow_dispatch:
     inputs:
       environment:
@@ -16,63 +12,15 @@ on:
         required: true
         default: 'test'
         type: choice
-        options:
-        - test
-        - prod
+        options: [test, prod]
 
 env:
   TF_VERSION: '1.5.0'
   NODE_VERSION: '14'
 
 jobs:
-  plan:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [test, prod]
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets[format('AWS_ACCESS_KEY_ID_{0}', upper(matrix.environment))] }}
-          aws-secret-access-key: ${{ secrets[format('AWS_SECRET_ACCESS_KEY_{0}', upper(matrix.environment))] }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Terraform Init
-        run: |
-          terraform init \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-            -backend-config="key=${{ matrix.environment }}/terraform.tfstate" \
-            -backend-config="region=${{ secrets.AWS_REGION }}" \
-            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
-        working-directory: ./terraform/environments/${{ matrix.environment }}
-
-      - name: Terraform Plan
-        run: |
-          terraform plan \
-            -var="environment=${{ matrix.environment }}" \
-            -var="custom_domain=${{ secrets.CUSTOM_DOMAIN }}" \
-            -var="aws_account_id=${{ secrets[format('AWS_ACCOUNT_ID_{0}', upper(matrix.environment))] }}" \
-            -out=tfplan
-        working-directory: ./terraform/environments/${{ matrix.environment }}
-
-      - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v3
-        with:
-          name: tfplan-${{ matrix.environment }}
-          path: terraform/environments/${{ matrix.environment }}/tfplan
-
   deploy:
-    needs: plan
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     environment: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
     
     steps:
@@ -97,49 +45,22 @@ jobs:
             -backend-config="key=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}/terraform.tfstate" \
             -backend-config="region=${{ secrets.AWS_REGION }}" \
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
-        working-directory: ./terraform/environments/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
-
-      - name: Download Terraform Plan
-        uses: actions/download-artifact@v3
-        with:
-          name: tfplan-${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
-          path: terraform/environments/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
+        working-directory: ./terraform/env/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
 
       - name: Terraform Apply
         run: |
-          terraform apply \
-            -auto-approve \
+          terraform apply -auto-approve \
             -var="environment=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}" \
-            -var="custom_domain=${{ secrets.CUSTOM_DOMAIN }}" \
-            -var="aws_account_id=${{ secrets[format('AWS_ACCOUNT_ID_{0}', github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'PROD' || 'TEST'))] }}" \
-            tfplan
-        working-directory: ./terraform/environments/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
+            -var="domain_name=${{ secrets.DOMAIN_NAME }}" \
+            -var="bucket_name=${{ secrets.BUCKET_NAME }}" \
+            -var="lambda_function_name=${{ secrets.LAMBDA_FUNCTION_NAME }}" \
+            -var="dynamodb_table_name=${{ secrets.DYNAMODB_TABLE_NAME }}"
+        working-directory: ./terraform/env/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ./Website
-
-      - name: Build React app
-        run: npm run build
-        working-directory: ./Website
-        env:
-          REACT_APP_ENV: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
-
-      - name: Sync files to S3
+      - name: Deploy Website
         run: |
           BUCKET_NAME=$(terraform output -raw website_bucket_name)
-          aws s3 sync ../Website/build/ s3://$BUCKET_NAME --delete
-        working-directory: ./terraform/environments/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
-
-      - name: Invalidate CloudFront distribution
-        run: |
+          aws s3 sync ./Website/ s3://$BUCKET_NAME --delete
           DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)
           aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
-        working-directory: ./terraform/environments/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}
-```
-</rewritten_file>
+        working-directory: ./terraform/env/${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod' || 'test') }}

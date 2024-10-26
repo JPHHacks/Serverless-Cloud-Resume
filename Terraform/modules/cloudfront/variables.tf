@@ -3,6 +3,11 @@ variable "s3_bucket_name" {
   description = "The name of the S3 bucket for the website"
 }
 
+variable "s3_bucket_arn" {
+  type        = string
+  description = "The ARN of the S3 bucket for the website"
+}
+
 variable "aliases" {
   type        = list(string)
   description = "List of aliases (domain names) for the CloudFront distribution"

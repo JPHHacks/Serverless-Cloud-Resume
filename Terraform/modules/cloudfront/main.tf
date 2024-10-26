@@ -1,40 +1,31 @@
+# CloudFront Distribution
 resource "aws_cloudfront_distribution" "distribution" {
-  aliases = var.aliases
+  enabled             = true
+  is_ipv6_enabled     = true
+  http_version        = "http2"
+  default_root_object = "index.html"
+  aliases             = var.aliases
+  price_class         = "PriceClass_All"
+
+  origin {
+    domain_name              = "${var.s3_bucket_name}.s3.us-east-1.amazonaws.com"
+    origin_id                = var.s3_bucket_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.default.id
+
+    connection_attempts = 3
+    connection_timeout  = 10
+  }
 
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
-    compress               = true
-    default_ttl            = 0
-    max_ttl                = 0
-    min_ttl                = 0
-    smooth_streaming       = false
     target_origin_id       = var.s3_bucket_name
+    compress              = true
     viewer_protocol_policy = "redirect-to-https"
 
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
+    # Use AWS managed CachingOptimized policy
+    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
-
-  default_root_object = "index.html"
-  enabled             = true
-  http_version        = "http2"
-  is_ipv6_enabled     = true
-
-  origin {
-    domain_name = "${var.s3_bucket_name}.s3.us-east-1.amazonaws.com"
-    origin_id   = var.s3_bucket_name
-
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
-    }
-  }
-
-  price_class = "PriceClass_All"
 
   restrictions {
     geo_restriction {
@@ -43,8 +34,9 @@ resource "aws_cloudfront_distribution" "distribution" {
   }
 
   viewer_certificate {
-    acm_certificate_arn = var.certificate_arn
-    ssl_support_method  = "sni-only"
+    acm_certificate_arn      = var.certificate_arn
+    minimum_protocol_version = "TLSv1.2_2021"
+    ssl_support_method       = "sni-only"
   }
 
   tags = {
@@ -52,26 +44,11 @@ resource "aws_cloudfront_distribution" "distribution" {
   }
 }
 
-resource "aws_cloudfront_origin_access_identity" "oai" {
-  comment = "OAI for ${var.s3_bucket_name}"
-}
-
-resource "aws_cloudfront_cache_policy" "cache_policy" {
-  name        = "CloudResumePolicy-${var.environment}"
-  comment     = "Cache policy for Cloud Resume Challenge"
-  default_ttl = 50
-  max_ttl     = 100
-  min_ttl     = 1
-
-  parameters_in_cache_key_and_forwarded_to_origin {
-    cookies_config {
-      cookie_behavior = "none"
-    }
-    headers_config {
-      header_behavior = "none"
-    }
-    query_strings_config {
-      query_string_behavior = "none"
-    }
-  }
+# Origin Access Control for S3
+resource "aws_cloudfront_origin_access_control" "default" {
+  name                              = "OAC for ${var.s3_bucket_name}"
+  description                       = "Origin Access Control for Cloud Resume Challenge"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }
