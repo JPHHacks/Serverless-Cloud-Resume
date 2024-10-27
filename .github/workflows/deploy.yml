@@ -42,7 +42,7 @@ jobs:
             -backend-config="key=prod/terraform.tfstate" \
             -backend-config="region=${{ secrets.AWS_REGION }}" \
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
-        working-directory: ./terraform/env/prod
+        working-directory: ./terraform/backend-setup
 
       - name: Terraform Plan  # Changed from apply to plan
         run: |
@@ -51,3 +51,4 @@ jobs:
             -var="lambda_function_name=${{ secrets.LAMBDA_FUNCTION_NAME }}" \
             -var="dynamodb_table_name=${{ secrets.DYNAMODB_TABLE_NAME }}"
         working-directory: ./terraform/env/prod
+  
