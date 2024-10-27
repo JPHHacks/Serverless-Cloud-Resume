@@ -24,8 +24,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          role-to-assume: arn:aws:iam::222634359784:role/GitHubActionsRole  
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Setup Terraform
