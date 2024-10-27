@@ -9,6 +9,11 @@ resource "aws_s3_bucket" "terraform_state" {
   lifecycle {
     prevent_destroy = true  # Protects against accidental deletion
   }
+
+  tags = {  # Tags added here
+    Name        = "Terraform State Bucket"
+    Environment = "management"
+  }
 }
 
 # Enable versioning for state history
@@ -60,14 +65,6 @@ resource "aws_dynamodb_table" "terraform_state_lock" {
 
   tags = {
     Name        = "Terraform State Lock Table"
-    Environment = "management"
-  }
-}
-
-# Add tags to the S3 bucket
-resource "aws_s3_bucket" "terraform_state" {
-  tags = {
-    Name        = "Terraform State Bucket"
     Environment = "management"
   }
 }
