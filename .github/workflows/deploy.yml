@@ -24,9 +24,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: List Files in Terraform Directory
-        run: ls -R ./terraform  # List files to verify the directory structure
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -45,7 +42,7 @@ jobs:
             -backend-config="key=prod/terraform.tfstate" \
             -backend-config="region=${{ secrets.AWS_REGION }}" \
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
-        working-directory: ./terraform/backend-setup  
+        working-directory: ./terraform/backend-setup
 
       - name: Terraform Plan  # Changed from apply to plan
         run: |
@@ -53,4 +50,4 @@ jobs:
             -var="environment=prod" \
             -var="lambda_function_name=${{ secrets.LAMBDA_FUNCTION_NAME }}" \
             -var="dynamodb_table_name=${{ secrets.DYNAMODB_TABLE_NAME }}"
-        working-directory: ./terraform/env/prod  
+        working-directory: ./terraform/env/prod
