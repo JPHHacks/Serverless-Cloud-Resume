@@ -6,11 +6,15 @@ module "s3_website" {
   cloudfront_distribution_arn = module.cloudfront.distribution_arn
 }
 
-# Route53 Zone Module
-module "route53_zone" {
-  source      = "../../modules/route53_zone"
-  domain_name = var.domain_name
-  environment = var.environment
+# Route53 Module
+module "route53" {
+  source                    = "../../modules/route53"
+  domain_name               = var.domain_name
+  cloudfront_domain_name    = module.cloudfront.distribution_domain_name
+  cloudfront_hosted_zone_id = module.cloudfront.distribution_hosted_zone_id
+  environment               = var.environment
+  acm_certificate_domain_validation_options = module.certificate_manager.domain_validation_options
+  route53_zone_id           = aws_route53_zone.main.zone_id
 }
 
 # Certificate Manager Module
@@ -18,7 +22,7 @@ module "certificate_manager" {
   source         = "../../modules/certificate_manager"
   domain_name    = var.domain_name
   environment    = var.environment
-  route53_zone_id = module.route53_zone.zone_id
+  route53_zone_id = module.route53.route53_zone_id
 }
 
 # CloudFront Module
@@ -29,17 +33,6 @@ module "cloudfront" {
   aliases        = [var.domain_name, "www.${var.domain_name}"]
   environment    = var.environment
   certificate_arn = module.certificate_manager.certificate_arn
-}
-
-# Route53 Records Module
-module "route53_records" {
-  source                    = "../../modules/route53_records"
-  domain_name               = var.domain_name
-  cloudfront_domain_name    = module.cloudfront.distribution_domain_name
-  cloudfront_hosted_zone_id = module.cloudfront.distribution_hosted_zone_id
-  environment               = var.environment
-  route53_zone_id           = module.route53_zone.zone_id
-  acm_certificate_validation_records = module.certificate_manager.domain_validation_records
 }
 
 # Lambda Function Module
