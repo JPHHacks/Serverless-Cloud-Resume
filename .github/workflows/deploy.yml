@@ -35,6 +35,12 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Debug Secrets
+        run: |
+          echo "TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}"
+          echo "AWS_REGION: ${{ secrets.AWS_REGION }}"
+          echo "TF_LOCK_TABLE: ${{ secrets.TF_LOCK_TABLE }}"
+
       - name: Terraform Init
         run: |
           terraform init -reconfigure \
