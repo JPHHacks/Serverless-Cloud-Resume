@@ -2,19 +2,18 @@ resource "aws_s3_bucket" "website_bucket" {
   bucket        = var.bucket_name
   force_destroy = false
 
-  object_lock_enabled = false
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-      bucket_key_enabled = true
-    }
-  }
-
   tags = {
     Environment = var.environment
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "website_bucket_encryption" {
+  bucket = aws_s3_bucket.website_bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
   }
 }
 
