@@ -27,3 +27,9 @@ variable "dynamodb_table_name" {
   description = "The name of the DynamoDB table"
   default     = "ViewCount"
 }
+
+variable "route53_zone_name" {
+  description = "The name of the Route 53 hosted zone"
+  type        = string
+  default     = "jpheymann"
+}

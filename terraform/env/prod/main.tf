@@ -1,3 +1,8 @@
+# Reference the existing Route 53 Hosted Zone
+//data "aws_route53_zone" "existing" {
+//  name = var.domain_name  # Ensure this variable is defined with your domain name
+//}
+
 # S3 Website Module
 module "s3_website" {
   source                     = "../../modules/s3_website"
@@ -7,33 +12,34 @@ module "s3_website" {
 }
 
 # Route53 Module
-module "route53" {
-  source                    = "../../modules/route53"
-  domain_name               = var.domain_name
-  cloudfront_domain_name    = module.cloudfront.distribution_domain_name
-  cloudfront_hosted_zone_id = module.cloudfront.distribution_hosted_zone_id
-  environment               = var.environment
-  acm_certificate_domain_validation_options = module.certificate_manager.domain_validation_options
-  route53_zone_id           = aws_route53_zone.main.zone_id
-}
+//module "route53" {
+//  source                             = "../../modules/route53"
+//  domain_name                        = var.domain_name
+//  cloudfront_domain_name             = module.cloudfront.distribution_domain_name
+//  cloudfront_hosted_zone_id          = module.cloudfront.distribution_hosted_zone_id
+//  environment                        = var.environment
+// acm_certificate_domain_validation_options = module.certificate_manager.domain_validation_options  # Pass the validation options
+// route53_zone_id                   = data.aws_route53_zone.existing.zone_id
+// route53_zone_name                 = var.route53_zone_name
+//}
 
 # Certificate Manager Module
-module "certificate_manager" {
-  source         = "../../modules/certificate_manager"
-  domain_name    = var.domain_name
-  environment    = var.environment
-  route53_zone_id = module.route53.route53_zone_id
-}
+//module "certificate_manager" {
+//  source         = "../../modules/certificate_manager"
+//  domain_name    = var.domain_name
+//  environment    = var.environment
+//  route53_zone_id = data.aws_route53_zone.existing.zone_id  # Use the data source here
+// }
 
 # CloudFront Module
-module "cloudfront" {
-  source         = "../../modules/cloudfront"
-  s3_bucket_name = module.s3_website.bucket_name
-  s3_bucket_arn  = module.s3_website.bucket_arn
-  aliases        = [var.domain_name, "www.${var.domain_name}"]
-  environment    = var.environment
-  certificate_arn = module.certificate_manager.certificate_arn
-}
+//  module "cloudfront" {
+//  source         = "../../modules/cloudfront"
+//  s3_bucket_name = module.s3_website.bucket_name
+//  s3_bucket_arn  = module.s3_website.bucket_arn
+//  aliases        = [var.domain_name, "www.${var.domain_name}"]
+//  environment    = var.environment
+//  certificate_arn = module.certificate_manager.certificate_arn
+//}
 
 # Lambda Function Module
 module "lambda_function" {

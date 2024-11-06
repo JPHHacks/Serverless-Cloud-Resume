@@ -5,11 +5,11 @@ data "aws_route53_zone" "existing" {
 
 # Reference existing ACM certificate validation records
 resource "aws_route53_record" "cert_validation" {
-  count   = length(tolist(aws_acm_certificate.cert.domain_validation_options))
-  name    = tolist(aws_acm_certificate.cert.domain_validation_options)[count.index].resource_record_name
-  type    = tolist(aws_acm_certificate.cert.domain_validation_options)[count.index].resource_record_type
+  count   = length(var.acm_certificate_domain_validation_options)  # Use the variable instead
+  name    = var.acm_certificate_domain_validation_options[count.index].resource_record_name
+  type    = var.acm_certificate_domain_validation_options[count.index].resource_record_type
   zone_id = data.aws_route53_zone.existing.zone_id
-  records = [tolist(aws_acm_certificate.cert.domain_validation_options)[count.index].resource_record_value]
+  records = [var.acm_certificate_domain_validation_options[count.index].resource_record_value]
   ttl     = 60
 }
 

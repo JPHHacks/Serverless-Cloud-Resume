@@ -19,11 +19,11 @@ variable "cloudfront_hosted_zone_id" {
 }
 
 variable "acm_certificate_domain_validation_options" {
-  type = object({
+  type = list(object({
     resource_record_name  = string
     resource_record_type  = string
     resource_record_value = string
-  })
+  }))
   description = "The domain validation options for the ACM certificate"
 }
 
@@ -31,3 +31,8 @@ variable "environment" {
   type        = string
   description = "The environment (e.g., test, prod)"
 }
+
+variable "route53_zone_name" {
+     description = "The name of the Route 53 hosted zone"
+     type        = string
+   }
