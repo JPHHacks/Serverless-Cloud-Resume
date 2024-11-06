@@ -43,17 +43,10 @@ jobs:
 
       - name: Terraform Init
         run: |
-          terraform init -reconfigure \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-            -backend-config="key=prod/terraform.tfstate" \
-            -backend-config="region=${{ secrets.AWS_REGION }}" \
-            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
-        working-directory: ./terraform/backend-setup
+          terraform init
+        working-directory: ./terraform/env/prod
 
       - name: Terraform Plan  # Changed from apply to plan
         run: |
-          terraform plan \
-            -var="environment=prod" \
-            -var="lambda_function_name=${{ secrets.LAMBDA_FUNCTION_NAME }}" \
-            -var="dynamodb_table_name=${{ secrets.DYNAMODB_TABLE_NAME }}"
+          terraform plan
         working-directory: ./terraform/env/prod
