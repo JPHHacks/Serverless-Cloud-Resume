@@ -44,7 +44,7 @@ resource "aws_iam_role" "lambda_exec" {
 }
 
 resource "aws_lambda_permission" "api_gateway" {
-  statement_id  = "AllowAPIGatewayInvoke"
+  statement_id  = "AllowAPIGatewayInvokeUnique"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.website_view_counter.function_name
   principal     = "apigateway.amazonaws.com"

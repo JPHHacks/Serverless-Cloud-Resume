@@ -13,7 +13,7 @@ variable "bucket_name" {
 variable "domain_name" {
   type        = string
   description = "The domain name for the website"
-  default     = "jpheymann.com"
+  default     = "jpheymann.cloud"
 }
 
 variable "lambda_function_name" {
@@ -31,5 +31,5 @@ variable "dynamodb_table_name" {
 variable "route53_zone_name" {
   description = "The name of the Route 53 hosted zone"
   type        = string
-  default     = "jpheymann"
+  default     = "jpheymann.cloud"
 }
