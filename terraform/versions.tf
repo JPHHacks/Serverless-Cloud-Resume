@@ -6,6 +6,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 4.0.0"
     }
-    # Add other providers here if needed
+    
   }
 }

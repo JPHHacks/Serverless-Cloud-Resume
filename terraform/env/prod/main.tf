@@ -1,5 +1,5 @@
 data "aws_route53_zone" "existing" {
-  name = var.domain_name  # Replace with your actual domain name
+  name = var.domain_name  
 }
 
 # S3 Website Module

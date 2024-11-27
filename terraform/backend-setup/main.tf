@@ -6,7 +6,7 @@ resource "aws_s3_bucket" "terraform_state" {
     prevent_destroy = true  # Protects against accidental deletion
   }
 
-  tags = {  # Tags added here
+  tags = {  
     Name        = "Terraform State Bucket"
     Environment = "management"
   }

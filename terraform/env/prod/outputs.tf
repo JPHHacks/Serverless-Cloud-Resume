@@ -35,5 +35,5 @@ output "certificate_arn" {
 
 output "route53_zone_id" {
   description = "The Zone ID of the Route53 hosted zone"
-  value       = module.route53.route53_zone_id  # Ensure this matches the output name in the route53 module
+  value       = module.route53.route53_zone_id  
 }

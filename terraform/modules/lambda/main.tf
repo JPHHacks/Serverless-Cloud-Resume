@@ -1,8 +1,7 @@
-# Add this data source at the top of your main.tf file
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda_code"  # Directory containing your Lambda function code
-  output_path = "${path.module}/lambda_function.zip"  # Output path for the ZIP file
+  source_dir  = "${path.module}/lambda_code"  
+  output_path = "${path.module}/lambda_function.zip"  
 }
 
 resource "aws_lambda_function" "website_view_counter" {
@@ -15,7 +14,7 @@ resource "aws_lambda_function" "website_view_counter" {
   memory_size   = 128
   timeout       = 3
 
-  # Use the output from the archive_file data source
+  # Uses the output from the archive_file data source
   filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
