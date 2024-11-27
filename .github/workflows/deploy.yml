@@ -70,7 +70,7 @@ jobs:
           
         - name: Sync Files to S3
           run: |
-            aws s3 sync ./website/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
+            aws s3 sync ./website/build s3://${{ secrets.S3_BUCKET_NAME }} --delete --debug
           env:
             AWS_REGION: ${{ secrets.AWS_REGION }}
 
