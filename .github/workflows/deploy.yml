@@ -22,12 +22,12 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install
-        working-directory: ./path/to/your/react/app  # Change to your React app directory
+        working-directory: ./website  # Change to your React app directory
 
       - name: Build React App
         run: |
           npm run build
-        working-directory: ./path/to/your/react/app  # Change to your React app directory
+        working-directory: ./website  # Change to your React app directory
 
   deploy:
     runs-on: ubuntu-latest
