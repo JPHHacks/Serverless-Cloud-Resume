@@ -26,6 +26,7 @@ const Navigation = React.forwardRef((props, ref) => {
       ref={ref}
       className={`px-3 fixed-top ${!isTop ? "navbar-white" : "navbar-transparent"}`}
       expand="lg"
+      style={{ transition: "background-color 0.3s", backgroundColor: scrollPosition > 50 ? "rgba(255, 255, 255, 0.9)" : "transparent" }}
     >
       <Navbar.Brand className="navbar-brand" href={process.env.PUBLIC_URL + "/#home"}>
         {`| ${mainBody.firstName} |`}
