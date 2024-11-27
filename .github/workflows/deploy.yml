@@ -66,11 +66,10 @@ jobs:
         - name: Terraform Apply
           run: |
             terraform apply -auto-approve
-          working-directory: ./terraform/env/prod 
-          
+          working-directory: ./terraform/env/prod
+
         - name: Sync Files to S3
-          run: aws s3 sync build s3://jpheymannweb-prod --delete --debug
-          working-directory: ./website
+          run: aws s3 sync ./website/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
           env:
             AWS_REGION: ${{ secrets.AWS_REGION }}
 
