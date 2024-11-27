@@ -16,8 +16,3 @@ output "www_domain_record" {
   description = "The fully qualified domain name of the www subdomain"
 }
 
-# Output the FQDN of the blog subdomain
-output "blog_domain_record" {
-  value       = aws_route53_record.blog_cname.fqdn  # Reference the blog CNAME record
-  description = "The fully qualified domain name of the blog subdomain"
-}

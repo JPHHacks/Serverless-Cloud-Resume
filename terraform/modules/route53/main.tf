@@ -29,12 +29,3 @@ resource "aws_route53_record" "www_alias" {
   }
 }
 
-# Create CNAME Record for another subdomain (e.g., blog)
-resource "aws_route53_record" "blog_cname" {
-  zone_id = data.aws_route53_zone.existing.zone_id
-  name     = "blog.${var.domain_name}"  # Subdomain (e.g., blog.jpheymann.cloud)
-  type     = "CNAME"
-
-  ttl      = 300
-  records   = [var.cloudfront_domain_name]  # CloudFront distribution domain name or another target
-}
