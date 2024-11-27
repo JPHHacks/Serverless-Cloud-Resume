@@ -1,29 +1,45 @@
-name: Test Infrastructure Setup
+name: Deploy to S3 and Invalidate CloudFront
 
 on:
-  workflow_dispatch:  # Manual trigger only for now
-    inputs:
-      environment:
-        description: 'Test infrastructure setup'
-        required: true
-        default: 'prod'
-        type: choice
-        options: [prod]
+  push:
+    branches:
+      - main  # Change this to your default branch if it's not 'main'
 
 env:
   TF_VERSION: '1.5.0'
 
 jobs:
-  plan:  # Changed from deploy to plan
+  build:
     runs-on: ubuntu-latest
-    environment: prod
-    permissions:
-      id-token: write   # This is required for requesting the JWT
-      contents: read     # This allows the workflow to read the repository contents
-    
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # Specify the Node.js version you need
+
+      - name: Install Dependencies
+        run: |
+          npm install
+        working-directory: ./path/to/your/react/app  # Change to your React app directory
+
+      - name: Build React App
+        run: |
+          npm run build
+        working-directory: ./path/to/your/react/app  # Change to your React app directory
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build  # Ensure the build job completes before deploying
+    environment: prod
+    permissions:
+      id-token: write   # This is required for requesting the JWT
+      contents: read    # This allows the workflow to read the repository contents
+      packages: read    # This allows the workflow to read packages
+      actions: read     # This allows the workflow to read actions
+
+    steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -35,18 +51,29 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Debug Secrets
-        run: |
-          echo "TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}"
-          echo "AWS_REGION: ${{ secrets.AWS_REGION }}"
-          echo "TF_LOCK_TABLE: ${{ secrets.TF_LOCK_TABLE }}"
-
       - name: Terraform Init
         run: |
           terraform init
-        working-directory: ./terraform/env/prod
+        working-directory: ./terraform/env/prod  # Change to your Terraform directory
 
-      - name: Terraform Plan  # Changed from apply to plan
+      - name: Terraform Plan
         run: |
           terraform plan
-        working-directory: ./terraform/env/prod
+        working-directory: ./terraform/env/prod  # Change to your Terraform directory
+
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve
+        working-directory: ./terraform/env/prod  # Change to your Terraform directory
+
+      - name: Sync Files to S3
+        run: |
+          aws s3 sync ./path/to/your/react/app/build s3://your-bucket-name --delete
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Invalidate CloudFront Distribution
+        run: |
+          aws cloudfront create-invalidation --distribution-id YOUR_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}

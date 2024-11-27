@@ -27,38 +27,23 @@ resource "aws_s3_bucket_versioning" "website_bucket_versioning" {
 resource "aws_s3_bucket_policy" "website" {
   bucket = aws_s3_bucket.website_bucket.id
   policy = jsonencode({
-    Version = "2012-10-17"
-    Id      = "PolicyForCloudFrontPrivateContent"
-    Statement = [
-      {
-        Sid       = "AllowCloudFrontServicePrincipal"
-        Effect    = "Allow"
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
+    "Version": "2012-10-17",
+    "Id": "PolicyForCloudFrontPrivateContent",
+    "Statement": [
+        {
+            "Sid": "AllowCloudFrontServicePrincipal",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudfront.amazonaws.com"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::jpheymannweb-prod/*",
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": "arn:aws:cloudfront::222634359784:distribution/E18PUX4RRDTKVB"
+                }
+            }
         }
-        Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.website_bucket.arn}/*"
-        Condition = {
-          StringEquals = {
-            "AWS:SourceArn" = var.cloudfront_distribution_arn
-          }
-        }
-      },
-      {
-        Sid       = "DenyDirectAccess"
-        Effect    = "Deny"
-        Principal = "*"
-        Action    = "s3:*"
-        Resource = [
-          aws_s3_bucket.website_bucket.arn,
-          "${aws_s3_bucket.website_bucket.arn}/*"
-        ]
-        Condition = {
-          StringNotLike = {
-            "aws:PrincipalArn" = var.cloudfront_distribution_arn
-          }
-        }
-      }
     ]
   })
 }
