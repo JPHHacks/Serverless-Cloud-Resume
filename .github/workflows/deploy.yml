@@ -40,40 +40,42 @@ jobs:
       actions: read     # This allows the workflow to read actions
 
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::222634359784:role/GitHubActionsRole  
-          aws-region: ${{ secrets.AWS_REGION }}
+        - uses: actions/checkout@v3
+  
+        - name: Configure AWS Credentials
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+            role-to-assume: arn:aws:iam::222634359784:role/GitHubActionsRole  
+            aws-region: ${{ secrets.AWS_REGION }}
+  
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v2
+          with:
+            terraform_version: ${{ env.TF_VERSION }}
+       
+        - name: Terraform Init
+          run: |
+            terraform init
+          working-directory: ./terraform/env/prod
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
+        - name: Terraform Plan
+          run: |
+            terraform plan
+          working-directory: ./terraform/env/prod 
 
-      - name: Terraform Init
-        run: |
-          terraform init
-        working-directory: ./terraform/env/prod  # Change to your Terraform directory
+        - name: Terraform Apply
+          run: |
+            terraform apply -auto-approve
+          working-directory: ./terraform/env/prod 
+          
+        - name: Sync Files to S3
+          run: |
+            aws s3 sync ./website/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
+          env:
+            AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Terraform Plan
-        run: |
-          terraform plan
-        working-directory: ./terraform/env/prod  # Change to your Terraform directory
-
-      - name: Terraform Apply
-        run: |
-          terraform apply -auto-approve
-        working-directory: ./terraform/env/prod  # Change to your Terraform directory
-
-      - name: Sync Files to S3
-        run: |
-          aws s3 sync ./path/to/your/react/app/build s3://your-bucket-name --delete
-        env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-
-      - name: Invalidate CloudFront Distribution
-        run: |
-          aws cloudfront create-invalidation --distribution-id YOUR_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
-        env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+        - name: Invalidate CloudFront Distribution
+          run: |
+            aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+          env:
+            AWS_REGION: ${{ secrets.AWS_REGION }}
