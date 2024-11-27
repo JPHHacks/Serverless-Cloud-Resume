@@ -1,3 +1,31 @@
+# CloudFront Cache Policy for Frequent Updates
+resource "aws_cloudfront_cache_policy" "custom_cache_policy" {
+  name = "CustomCachePolicy"
+
+  default_ttl = 60  # 1 minute
+  max_ttl     = 300  # 5 minutes
+  min_ttl     = 0
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip = true
+    
+    cookies_config {
+      cookie_behavior = "all"
+    }
+    
+    headers_config {
+      header_behavior = "whitelist"
+      headers {
+        items = ["Authorization"]
+      }
+    }
+    
+    query_strings_config {
+      query_string_behavior = "all"
+    }
+  }
+}
+
 # CloudFront Distribution
 resource "aws_cloudfront_distribution" "distribution" {
   enabled             = true
@@ -23,8 +51,8 @@ resource "aws_cloudfront_distribution" "distribution" {
     compress              = true
     viewer_protocol_policy = "redirect-to-https"
 
-    # Use AWS managed CachingOptimized policy
-    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    # Use the custom cache policy
+    cache_policy_id = aws_cloudfront_cache_policy.custom_cache_policy.id
   }
 
   restrictions {
