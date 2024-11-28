@@ -10,7 +10,7 @@
 
 # production
 /public/CNAME
-
+/website/build
 # misc
 .DS_Store
 .env.local
