@@ -5,7 +5,7 @@ This project is my implementation of the Cloud Resume Challenge, a hands-on proj
 
 ## Live Site
 
-You can view the live resume here: https://jpheymann.com
+You can view the live resume here: https://www.jpheymann.cloud
 
 ## Architecture
 ![Terraform](https://github.com/user-attachments/assets/4a639474-7184-47f7-93a5-5fb99ec84668)
@@ -30,6 +30,9 @@ You can view the live resume here: https://jpheymann.com
    - This is deployed to an S3 bucket created using Terraform.
    - CloudFront is used to ensure the website is delivered quickly and securely over HTTPS.
 
+2. **Backend**:
+   - The backend code is located in the `backend-setup` folder, which includes AWS Lambda functions and API Gateway configurations to handle backend logic.
+
 2. **Terraform**:
    - The project uses Terraform modules to manage AWS services.
    - **Environments** (`test` and `prod`) are defined separately in `terraform/environments/`.
@@ -46,37 +49,43 @@ You can view the live resume here: https://jpheymann.com
    `git clone https://github.com/JPHHacks/Serverless-Cloud-Resume.git`
    
 
-**2. Set up AWS CLI with SSO (if not already configured):**
+**2. Setting up AWS CLI with SSO (if not already configured):**
 
    `aws configure sso`
    
    Follow the prompts to set up SSO for your AWS accounts
 
-**3. For local development and testing (test environment only):**
+**3. Initialize Terraform:**
+
+   Before deploying, you need to initialize Terraform in both the backend and production directories.
+
+   - **Navigate to the Backend Setup Directory**:
+     ```bash
+     cd terraform/backend-setup
+     terraform init
+     ```
+
+   - **Navigate to the Production Environment Directory**:
+     ```bash
+     cd ../env/prod
+     terraform init
+     ```
+
+**4. Deploying the infrastructure:**
+
+   Log in to AWS SSO for the production account:
    
-   Switch to the test environment directory
+   `aws sso login --profile prod-profile`
    
-   `cd terraform/environments/test`
-   
-   Log in to AWS SSO for the test account
-   
-   `aws sso login --profile test-profile`
-   
-   Initialize Terraform (create a backend.hcl file with non-sensitive config)
-   
-   `terraform init -backend-config=backend.hcl`
-   
-   Plan Terraform changes
+   Plan Terraform changes:
    
    `terraform plan -out=tfplan`
    
-   Apply changes (only for test environment)
+   Apply changes:
    
    `terraform apply tfplan`
 
-**4. For production deployment:**
-
-   Commit and push your changes to the main branch
+   Commit and push your changes to the main branch:
    
    `git add .`
    
@@ -84,9 +93,8 @@ You can view the live resume here: https://jpheymann.com
    
    `git push origin main`
 
-   This will trigger the GitHub Actions workflow for deployment
-
-
+   This will trigger the GitHub Actions workflow for deployment.               
+   
 
 ## Website Deployment
 
