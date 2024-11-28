@@ -19,7 +19,7 @@ module "route53" {
   environment                        = var.environment
   acm_certificate_domain_validation_options = module.certificate_manager.domain_validation_options  # Pass the validation options
   route53_zone_id                   = data.aws_route53_zone.existing.zone_id
- route53_zone_name                 = var.route53_zone_name
+  route53_zone_name                 = var.route53_zone_name
 }
 
 # Certificate Manager Module

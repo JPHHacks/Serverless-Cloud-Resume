@@ -25,7 +25,7 @@ variable "lambda_function_name" {
 variable "dynamodb_table_name" {
   type        = string
   description = "The name of the DynamoDB table"
-  default     = "ViewCount"
+  default     = "WebsiteViewCounter"
 }
 
 variable "route53_zone_name" {
