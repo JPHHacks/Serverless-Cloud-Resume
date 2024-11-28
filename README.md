@@ -29,16 +29,15 @@ You can view the live resume here: https://www.jpheymann.cloud
    - The `Website/` folder contains a React app, which serves as the static resume.
    - This is deployed to an S3 bucket created using Terraform.
    - CloudFront is used to ensure the website is delivered quickly and securely over HTTPS.
+   - The frontend uses JavaScript to call the API, which invokes AWS Lambda functions for backend operations, such as incrementing view counts and retrieving data.
 
-2. **Backend**:
-   - The backend code is located in the `backend-setup` folder, which includes AWS Lambda functions and API Gateway configurations to handle backend logic.
+3. **Terraform**:
+   - The project uses Terraform to manage AWS services.
+   - The `terraform/modules/` directory contains reusable modules for various AWS resources, including S3, CloudFront, Lambda, DynamoDB, Route 53, ACM, and API Gateway.
+   - The production environment is defined in `terraform/env/prod/`, which includes all necessary resources for the application.
+   - The `backend-setup` directory is specifically for managing the Terraform state using S3 and DynamoDB.
 
-2. **Terraform**:
-   - The project uses Terraform modules to manage AWS services.
-   - **Environments** (`test` and `prod`) are defined separately in `terraform/environments/`.
-   - Global resources, such as S3, CloudFront, Lambda, and DynamoDB, are handled via Terraform modules in `terraform/modules/`.
-
-3. **CI/CD Pipeline**:
+4. **CI/CD Pipeline**:
    - The `.github/workflows/deploy.yml` file defines a GitHub Actions workflow that automatically deploys changes.
    - Any push to the main branch triggers the workflow, which runs the Terraform commands to update AWS infrastructure.
 
@@ -98,8 +97,13 @@ You can view the live resume here: https://www.jpheymann.cloud
 
 ## Website Deployment
 
-The website files in the Website/ folder can be deployed to the S3 bucket created by Terraform.
-CloudFront will serve the content securely over HTTPS.
+The deployment of the website is automated using GitHub Actions, specifically through the `.github/workflows/deploy.yml` file. This workflow is triggered on every push to the `main` branch and performs the following tasks:
+
+1. **Builds the React App**: It installs dependencies and builds the React application for production.
+2. **Deploys to S3**: After building, it deploys the optimized app to an S3 bucket.
+3. **Invalidates CloudFront Cache**: The workflow ensures that the CloudFront distribution is updated to serve the latest version of the website.
+
+This automation simplifies the deployment process, ensuring that the live site is always up-to-date with the latest changes.
 
 ## Project Challenges
 
