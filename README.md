@@ -26,7 +26,7 @@ You can view the live resume here: https://www.jpheymann.cloud
 ## How It Works
 
 1. **Website**:
-   - The `Website/` folder contains a React app, which serves as the static resume.
+   - The `website/` folder contains a React app, which serves as the static resume.
    - This is deployed to an S3 bucket created using Terraform.
    - CloudFront is used to ensure the website is delivered quickly and securely over HTTPS.
    - The frontend uses JavaScript to call the API, which invokes AWS Lambda functions for backend operations, such as incrementing view counts and retrieving data.
@@ -104,6 +104,10 @@ The deployment of the website is automated using GitHub Actions, specifically th
 3. **Invalidates CloudFront Cache**: The workflow ensures that the CloudFront distribution is updated to serve the latest version of the website.
 
 This automation simplifies the deployment process, ensuring that the live site is always up-to-date with the latest changes.
+
+## AWS Account Management
+
+To facilitate secure access to AWS resources, I created an AWS Organizations setup for managing SSO (Single Sign-On) user accounts. This allows for centralized management of user permissions and access across multiple AWS accounts, ensuring that users have the appropriate level of access based on their roles.
 
 ## Project Challenges
 
