@@ -22,7 +22,7 @@ import Experience from "./components/home/Experience";
 
 const getViewCount = async () => {
   try {
-    const response = await fetch('https://uychpy2w0m.execute-api.us-east-1.amazonaws.com/prod');
+    const response = await fetch('https://2pmmbau05l.execute-api.us-east-1.amazonaws.com/prod');
     const data = await response.text();
     const count = parseInt(data, 10);
     if (!isNaN(count)) {
