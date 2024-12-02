@@ -8,7 +8,8 @@ This project is my implementation of the Cloud Resume Challenge, a hands-on proj
 You can view the live resume here: https://www.jpheymann.cloud
 
 ## Architecture
-![Terraform](https://github.com/JPHHacks/Serverless-Cloud-Resume/issues/1#issue-2712848535)
+[Terraform.pdf](https://github.com/user-attachments/files/17982075/awsTerraform.pdf)
+
 
 
 
