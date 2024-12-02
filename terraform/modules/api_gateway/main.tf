@@ -58,8 +58,12 @@ resource "aws_api_gateway_integration" "options_integration" {
   rest_api_id             = aws_api_gateway_rest_api.website_view_counter_api.id
   resource_id             = aws_api_gateway_rest_api.website_view_counter_api.root_resource_id
   http_method             = aws_api_gateway_method.options.http_method
-  integration_http_method = "POST"
   type                    = "MOCK"  # Use MOCK for OPTIONS
+  connection_type         = "INTERNET"
+  passthrough_behavior    = "WHEN_NO_MATCH"
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"  # Return a 200 status code for OPTIONS
+  }
 }
 
 resource "aws_api_gateway_method_response" "options_response" {
