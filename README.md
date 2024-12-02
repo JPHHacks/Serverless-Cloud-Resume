@@ -8,7 +8,8 @@ This project is my implementation of the Cloud Resume Challenge, a hands-on proj
 You can view the live resume here: https://www.jpheymann.cloud
 
 ## Architecture
-[Terraform.pdf](https://github.com/user-attachments/files/17982075/awsTerraform.pdf)
+![Terraform](https://github.com/user-attachments/assets/db9d13f8-0f7c-4333-85a3-b0fa6968e2b7)
+
 
 
 
