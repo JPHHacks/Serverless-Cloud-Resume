@@ -94,7 +94,7 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
 
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.website_view_counter_api.id
-  stage_name  = var.environment  # Use your desired stage name (e.g., "prod")
+  stage_name  = var.environment  
 
   depends_on = [
     aws_api_gateway_method.get,
@@ -107,7 +107,22 @@ resource "aws_api_gateway_deployment" "deployment" {
 resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = var.lambda_function_name  # The name of your Lambda function
+  function_name = var.lambda_function_name  
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.website_view_counter_api.execution_arn}/*/*"  # Allow all methods and resources
+}
+
+resource "aws_api_gateway_usage_plan" "website_view_counter_usage_plan" {
+  name        = "WebsiteViewCounterUsagePlan"
+  description = "Usage plan for the Website View Counter API"
+  
+  api_stages {
+    api_id = aws_api_gateway_rest_api.website_view_counter_api.id
+    stage  = var.environment 
+  }
+  # Sets the rate and burst limits
+  throttle_settings {
+    rate_limit  = 100
+    burst_limit = 200
+  }
 }
