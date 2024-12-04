@@ -48,7 +48,6 @@ resource "aws_s3_bucket_policy" "website" {
   })
 }
 
-# Add public access block
 resource "aws_s3_bucket_public_access_block" "website" {
   bucket = aws_s3_bucket.website_bucket.id
 

@@ -23,7 +23,7 @@ resource "aws_cloudfront_distribution" "distribution" {
     compress              = true
     viewer_protocol_policy = "redirect-to-https"
 
-    # Use the AWS managed CachingOptimized policy
+    # Uses the AWS managed CachingOptimized policy
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"  # Managed CachingOptimized policy ID
   }
 

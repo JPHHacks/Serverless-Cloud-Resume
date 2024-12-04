@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "tfer--jpheymannweb" {
+/*resource "aws_s3_bucket" "tfer--jpheymannweb" {
   bucket        = "jpheymannweb"
   force_destroy = false
 
@@ -41,4 +41,4 @@ resource "aws_s3_bucket" "tfer--jpheymannweb" {
   tags = {
     Environment = "test"  # Assuming this is for the test environment
   }
-}
+}*/

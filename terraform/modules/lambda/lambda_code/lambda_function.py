@@ -1,4 +1,4 @@
-import boto3
+import boto3 # type: ignore
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('WebsiteViewCounter') 

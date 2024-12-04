@@ -30,7 +30,7 @@ resource "aws_api_gateway_method_response" "response_200" {
   status_code = "200"
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = true  # Allow CORS for all origins
+    "method.response.header.Access-Control-Allow-Origin" = true  # Allows CORS for all origins
   }
 }
 
@@ -41,7 +41,7 @@ resource "aws_api_gateway_integration_response" "lambda_integration_response" {
   status_code = aws_api_gateway_method_response.response_200.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = "'*'"  # Allow CORS for all origins
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"  # Allows CORS for all origins
   }
 
   depends_on = [aws_api_gateway_integration.lambda_integration]
@@ -58,11 +58,11 @@ resource "aws_api_gateway_integration" "options_integration" {
   rest_api_id             = aws_api_gateway_rest_api.website_view_counter_api.id
   resource_id             = aws_api_gateway_rest_api.website_view_counter_api.root_resource_id
   http_method             = aws_api_gateway_method.options.http_method
-  type                    = "MOCK"  # Use MOCK for OPTIONS
+  type                    = "MOCK"  # Uses MOCK for OPTIONS
   connection_type         = "INTERNET"
   passthrough_behavior    = "WHEN_NO_MATCH"
   request_templates = {
-    "application/json" = "{\"statusCode\": 200}"  # Return a 200 status code for OPTIONS
+    "application/json" = "{\"statusCode\": 200}"  # Returns a 200 status code for OPTIONS
   }
 }
 
@@ -115,7 +115,7 @@ resource "aws_lambda_permission" "api_gateway" {
   action        = "lambda:InvokeFunction"
   function_name = var.lambda_function_name  
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.website_view_counter_api.execution_arn}/*/*"  # Allow all methods and resources
+  source_arn    = "${aws_api_gateway_rest_api.website_view_counter_api.execution_arn}/*/*"  # Allows all methods and resources
 }
 
 # Creates a Usage Plan for rate limiting

@@ -31,7 +31,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build  # Ensure the build job completes before deploying
+    needs: build  # Ensures the build job completes before deploying
     environment: prod
     permissions:
       id-token: write   # This is required for requesting the JWT

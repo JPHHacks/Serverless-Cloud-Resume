@@ -12,7 +12,7 @@ resource "aws_acm_certificate" "cert" {
   }
 }
 
-# Create Route 53 records for validation
+# Creates Route 53 records for validation
 resource "aws_route53_record" "cert_validation" {
   for_each = { for o in aws_acm_certificate.cert.domain_validation_options : o.domain_name => o }
 
