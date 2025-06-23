@@ -55,7 +55,7 @@ const about = {
   imageSize: 375,
   message:
     "My name is JP Heymann. I’m a recent graduate with a bachelor’s in cybersecurity from Palm Beach State College and a member of the Ethical Hacking Club, I have developed strong skills in identifying system vulnerabilities, deploying automated technologies, identifying malicious activities, and evaluating network security. I’m passionate about cloud security and continuously seeking ways to secure cloud environments, ensuring data integrity, confidentiality, and availability across digital infrastructures.",
-  resume: "https://drive.google.com/file/d/1S5Kiva2Bn1wmcEtC90fU4C3I86qbBs2x/view?usp=sharing",
+  resume: "https://drive.google.com/file/d/1qAIbB4HyA2gx8Nis_lB-CUG49gwJmetN/view?usp=sharing",
   
 };
 
