@@ -24,6 +24,17 @@ jobs:
           npm install
         working-directory: ./website  
 
+      - name: Clear cache and build
+        working-directory: ./website
+        run: |
+          # Remove old build and cache
+          rm -rf build/
+          rm -rf node_modules/.cache/
+          rm -rf .cache/
+          
+          # Clear npm cache
+          npm cache clean --force 
+
       - name: Build React App
         run: |
           npm run build
