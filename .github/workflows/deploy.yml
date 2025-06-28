@@ -86,11 +86,11 @@ jobs:
         continue-on-error: true
 
       - name: Security Scan - Snyk
-        uses: snyk/actions/node@master
+        run: |
+          cd website
+          snyk test --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
         continue-on-error: true
 
       - name: Security Scan Summary
