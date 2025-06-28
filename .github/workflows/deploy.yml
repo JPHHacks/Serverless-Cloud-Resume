@@ -12,16 +12,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '16'  
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
 
       - name: Install Dependencies
-        run: |
-          npm install
+        run: npm ci
         working-directory: ./website  
 
       - name: Clear cache and build
@@ -33,59 +34,71 @@ jobs:
           rm -rf .cache/
           
           # Clear npm cache
-          npm cache clean --force 
-
-      - name: Build React App
-        run: |
+          npm cache clean --force
+          
+          # Build fresh
           npm run build
-        working-directory: ./website  
+          
+          # Verify build timestamp
+          echo "Build completed at: $(date)"
+          ls -la build/
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: website/build/
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build  # Ensures the build job completes before deploying
+    needs: build
     environment: prod
     permissions:
-      id-token: write   # This is required for requesting the JWT
-      contents: read    # This allows the workflow to read the repository contents
-      packages: read    # This allows the workflow to read packages
-      actions: read     # This allows the workflow to read actions
+      id-token: write
+      contents: read
+      packages: read
+      actions: read
 
     steps:
-        - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: website/build/
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::222634359784:role/GitHubActionsRole  
+          aws-region: ${{ secrets.AWS_REGION }}
   
-        - name: Configure AWS Credentials
-          uses: aws-actions/configure-aws-credentials@v2
-          with:
-            role-to-assume: arn:aws:iam::222634359784:role/GitHubActionsRole  
-            aws-region: ${{ secrets.AWS_REGION }}
-  
-        - name: Setup Terraform
-          uses: hashicorp/setup-terraform@v2
-          with:
-            terraform_version: ${{ env.TF_VERSION }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
        
-        - name: Terraform Init
-          run: |
-            terraform init
-          working-directory: ./terraform/env/prod
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform/env/prod
 
-        - name: Terraform Plan
-          run: |
-            terraform plan
-          working-directory: ./terraform/env/prod 
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: ./terraform/env/prod 
 
-        - name: Terraform Apply
-          run: |
-            terraform apply -auto-approve
-          working-directory: ./terraform/env/prod
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./terraform/env/prod
 
-        - name: Sync Files to S3
-          run: aws s3 sync ./website/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
-          env:
-            AWS_REGION: ${{ secrets.AWS_REGION }}
+      - name: Sync Fresh Build to S3
+        run: aws s3 sync ./website/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
-        - name: Invalidate CloudFront Distribution
-          run: |
-            aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
-          env:
-            AWS_REGION: ${{ secrets.AWS_REGION }}
+      - name: Invalidate CloudFront Distribution
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
