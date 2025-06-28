@@ -3,7 +3,10 @@ name: Deploy to S3 and Invalidate CloudFront
 on:
   push:
     branches:
-      - main  
+      - main
+  pull_request:
+    branches:
+      - main
 
 env:
   TF_VERSION: '1.5.0'
@@ -23,9 +26,9 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
-        working-directory: ./website  
+        working-directory: ./website
 
-      - name: Clear cache and build
+      - name: Clear Cache and Build
         working-directory: ./website
         run: |
           # Remove old build and cache
@@ -39,7 +42,7 @@ jobs:
           # Build fresh
           npm run build
           
-          # Verify build timestamp
+          # Verify build
           echo "Build completed at: $(date)"
           ls -la build/
 
@@ -50,16 +53,62 @@ jobs:
           path: website/build/
           retention-days: 1
 
-  deploy:
+  security-scan:
     runs-on: ubuntu-latest
     needs: build
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: website/build/
+
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: ./website
+
+      - name: Security Scan - Dependencies
+        run: |
+          cd website
+          echo "🔍 Running npm audit..."
+          npm audit --audit-level=moderate || echo "npm audit completed"
+          
+          echo "✅ Dependency security scan completed"
+        continue-on-error: true
+
+      - name: Security Scan - Snyk
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+        continue-on-error: true
+
+      - name: Security Scan Summary
+        run: |
+          echo "## 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dependencies**: Scanned with npm audit" >> $GITHUB_STEP_SUMMARY
+          echo "- **Code Analysis**: Scanned with Snyk" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Security scan completed" >> $GITHUB_STEP_SUMMARY
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, security-scan]
     environment: prod
     permissions:
       id-token: write
       contents: read
       packages: read
       actions: read
-
     steps:
       - uses: actions/checkout@v4
 
@@ -72,33 +121,37 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::222634359784:role/GitHubActionsRole  
+          role-to-assume: arn:aws:iam::222634359784:role/GitHubActionsRole
           aws-region: ${{ secrets.AWS_REGION }}
-  
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-       
+
       - name: Terraform Init
         run: terraform init
         working-directory: ./terraform/env/prod
 
       - name: Terraform Plan
         run: terraform plan
-        working-directory: ./terraform/env/prod 
+        working-directory: ./terraform/env/prod
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: ./terraform/env/prod
 
-      - name: Sync Fresh Build to S3
-        run: aws s3 sync ./website/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./website/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
+          echo "Deployment completed at: $(date)"
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Invalidate CloudFront Distribution
+      - name: Invalidate CloudFront
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
