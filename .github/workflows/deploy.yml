@@ -76,6 +76,9 @@ jobs:
         run: npm ci
         working-directory: ./website
 
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
       - name: Security Scan - Dependencies
         run: |
           cd website
