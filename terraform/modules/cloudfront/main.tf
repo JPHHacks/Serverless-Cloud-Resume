@@ -52,6 +52,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   # Explicit dependencies to ensure S3 bucket and policies are created first
   depends_on = [
     aws_s3_bucket.access_logs,
+    aws_s3_bucket_region.access_logs,
     aws_s3_bucket_server_side_encryption_configuration.access_logs_encryption,
     aws_s3_bucket_policy.access_logs
   ]
@@ -66,6 +67,12 @@ resource "aws_s3_bucket" "access_logs" {
     Environment = var.environment
     Purpose     = "CloudFront access logs"
   }
+}
+
+# S3 Bucket region configuration (required for CloudFront logs)
+resource "aws_s3_bucket_region" "access_logs" {
+  bucket = aws_s3_bucket.access_logs.id
+  region = "us-east-1"
 }
 
 # S3 Bucket encryption for access logs
