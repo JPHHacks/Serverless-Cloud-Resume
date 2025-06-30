@@ -59,7 +59,7 @@ resource "aws_cloudfront_distribution" "distribution" {
 
 # S3 Bucket for CloudFront Access Logs
 resource "aws_s3_bucket" "access_logs" {
-  bucket        = "${var.s3_bucket_name}-access-logs"
+  bucket        = "jpheymannweb-prod-access-logs"
   force_destroy = false
 
   tags = {
