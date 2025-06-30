@@ -62,3 +62,18 @@ module "api_gateway" {
   lambda_function_name = module.lambda_function.function_name
   lambda_invoke_arn    = module.lambda_function.invoke_arn
 }
+
+# CloudWatch Module 
+module "cloudwatch" {
+  source                     = "../../modules/cloudwatch"
+  environment                = var.environment
+  cloudfront_distribution_id = module.cloudfront.distribution_id
+  sns_topic_arn             = module.sns.topic_arn
+}
+
+# SNS Module 
+module "sns" {
+  source        = "../../modules/sns"
+  environment   = var.environment
+  email_address = var.notification_email
+}
