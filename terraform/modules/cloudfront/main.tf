@@ -48,13 +48,6 @@ resource "aws_cloudfront_distribution" "distribution" {
   tags = {
     Environment = var.environment
   }
-
-  # Explicit dependencies to ensure S3 bucket and policies are created first
-  depends_on = [
-    aws_s3_bucket.access_logs,
-    aws_s3_bucket_server_side_encryption_configuration.access_logs_encryption,
-    aws_s3_bucket_policy.access_logs
-  ]
 }
 
 # S3 Bucket for CloudFront Access Logs
