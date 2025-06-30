@@ -27,6 +27,13 @@ resource "aws_cloudfront_distribution" "distribution" {
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"  # Managed CachingOptimized policy ID
   }
 
+  # CloudFront Access Logging
+  logging_config {
+    bucket          = aws_s3_bucket.access_logs.bucket
+    include_cookies = true
+    prefix          = "cloudfront-logs/"
+  }
+
   restrictions {
     geo_restriction {
       restriction_type = "none"
@@ -43,6 +50,57 @@ resource "aws_cloudfront_distribution" "distribution" {
     Environment = var.environment
   }
 }
+
+# S3 Bucket for CloudFront Access Logs
+resource "aws_s3_bucket" "access_logs" {
+  bucket        = "${var.s3_bucket_name}-access-logs"
+  force_destroy = false
+
+  tags = {
+    Environment = var.environment
+    Purpose     = "CloudFront access logs"
+  }
+}
+
+# S3 Bucket encryption for access logs
+resource "aws_s3_bucket_server_side_encryption_configuration" "access_logs_encryption" {
+  bucket = aws_s3_bucket.access_logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+# S3 Bucket policy for CloudFront access logs
+resource "aws_s3_bucket_policy" "access_logs" {
+  bucket = aws_s3_bucket.access_logs.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "CloudFrontLogDelivery"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action = [
+          "s3:PutObject"
+        ]
+        Resource = "${aws_s3_bucket.access_logs.arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/*"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# Data source for current AWS account ID
+data "aws_caller_identity" "current" {}
 
 # Origin Access Control for S3
 resource "aws_cloudfront_origin_access_control" "default" {
