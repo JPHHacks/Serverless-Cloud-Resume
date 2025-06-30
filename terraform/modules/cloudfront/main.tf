@@ -93,6 +93,22 @@ resource "aws_s3_bucket_policy" "access_logs" {
             "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/*"
           }
         }
+      },
+      {
+        Sid    = "CloudFrontLogDeliveryAcl"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action = [
+          "s3:GetBucketAcl"
+        ]
+        Resource = aws_s3_bucket.access_logs.arn
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/*"
+          }
+        }
       }
     ]
   })
