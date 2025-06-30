@@ -8,9 +8,8 @@ resource "aws_cloudfront_distribution" "distribution" {
   price_class         = "PriceClass_All"
 
   origin {
-    domain_name              = "${var.s3_bucket_name}.s3.us-east-1.amazonaws.com"
-    origin_id                = var.s3_bucket_name
-    origin_access_control_id = aws_cloudfront_origin_access_control.default.id
+    domain_name = "${var.s3_bucket_name}.s3.us-east-1.amazonaws.com"
+    origin_id   = var.s3_bucket_name
 
     connection_attempts = 3
     connection_timeout  = 10
