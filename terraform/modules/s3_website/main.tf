@@ -108,20 +108,14 @@ resource "aws_s3_bucket_policy" "logs_bucket" {
           Service = "cloudfront.amazonaws.com"
         }
         Action = [
-          "s3:PutObject"
+          "s3:PutObject",
+          "s3:GetBucketAcl",
+          "s3:PutBucketAcl"
         ]
-        Resource = "${aws_s3_bucket.logs_bucket.arn}/*"
-      },
-      {
-        Sid    = "CloudFrontLogDeliveryAcl"
-        Effect = "Allow"
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
-        }
-        Action = [
-          "s3:GetBucketAcl"
+        Resource = [
+          aws_s3_bucket.logs_bucket.arn,
+          "${aws_s3_bucket.logs_bucket.arn}/*"
         ]
-        Resource = aws_s3_bucket.logs_bucket.arn
       }
     ]
   })
