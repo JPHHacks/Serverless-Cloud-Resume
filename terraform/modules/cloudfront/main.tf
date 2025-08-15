@@ -25,11 +25,12 @@ resource "aws_cloudfront_distribution" "distribution" {
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
-  # CloudWatch Logs v2 integration - no S3 logging
+  # CloudFront v2 Logging Configuration
+  # This enables standard logging v2 which can send to CloudWatch Logs
   logging_config {
-    bucket          = null
+    bucket          = null  # Not using S3 bucket
     include_cookies = true
-    prefix          = null
+    prefix          = null  # Not using S3 prefix
   }
 
   restrictions {
@@ -60,27 +61,27 @@ resource "aws_cloudwatch_log_group" "cloudfront_logs" {
   }
 }
 
-# CloudWatch Log Delivery Source for CloudFront (v2)
-resource "aws_cloudwatch_log_delivery_source" "cloudfront" {
-  name = "cloudfront-logs-${var.environment}"
+# CloudWatch Log Delivery Source for CloudFront
+resource "aws_cloudwatch_log_delivery_source" "cloudfront_logs" {
+  name         = "cloudwatch-access-logs-${var.environment}"
+  log_type     = "ACCESS_LOGS"
+  resource_arn = aws_cloudfront_distribution.distribution.arn
+}
+
+# CloudWatch Log Delivery Destination for CloudFront
+resource "aws_cloudwatch_log_delivery_destination" "cloudfront_log_dest" {
+  name           = "cloudfront-destination-logs-${var.environment}"
+  output_format  = "json"  # Use JSON for easier querying
   
-  log_delivery_source_type = "CloudFront"
-  
-  tags = {
-    Environment = var.environment
-    Purpose     = "CloudFront logs delivery source"
+  delivery_destination_configuration {
+    destination_resource_arn = aws_cloudwatch_log_group.cloudfront_logs.arn
   }
 }
 
-# CloudWatch Log Delivery for CloudFront (v2)
-resource "aws_cloudwatch_log_delivery" "cloudfront" {
-  name = "cloudfront-logs-${var.environment}"
-  
-  log_delivery_source_name = aws_cloudwatch_log_delivery_source.cloudfront.name
-  
-  log_group_name = aws_cloudwatch_log_group.cloudfront_logs.name
-  
-  log_type = "ACCESS_LOGS"
+# CloudWatch Log Delivery for CloudFront
+resource "aws_cloudwatch_log_delivery" "cloudfront_logs" {
+  delivery_source_name      = aws_cloudwatch_log_delivery_source.cloudfront_logs.name
+  delivery_destination_arn  = aws_cloudwatch_log_delivery_destination.cloudfront_log_dest.arn
   
   tags = {
     Environment = var.environment

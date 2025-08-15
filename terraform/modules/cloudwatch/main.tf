@@ -1,4 +1,4 @@
-# CloudWatch Dashboard - Security Monitoring
+# Enhanced CloudWatch Dashboard with CloudFront Logs
 resource "aws_cloudwatch_dashboard" "security" {
   dashboard_name = "security-dashboard-${var.environment}"
 
@@ -105,7 +105,7 @@ fields @timestamp, @message
 EOF
 }
 
-# Security Alarm - High Error Rate
+# Security Alarm - High Error Rate (Enhanced)
 resource "aws_cloudwatch_metric_alarm" "security_error_rate" {
   alarm_name          = "security-error-rate-${var.environment}"
   comparison_operator = "GreaterThanThreshold"
@@ -129,7 +129,7 @@ resource "aws_cloudwatch_metric_alarm" "security_error_rate" {
   }
 }
 
-# Security Alarm - No Traffic (Site Down)
+# Security Alarm - Site Down (Enhanced)
 resource "aws_cloudwatch_metric_alarm" "site_down" {
   alarm_name          = "site-down-${var.environment}"
   comparison_operator = "LessThanThreshold"
