@@ -1,4 +1,4 @@
-# CloudFront Distribution with S3 Logging (Required for CloudFront)
+# CloudFront Distribution with CloudWatch Logs Integration
 resource "aws_cloudfront_distribution" "distribution" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -25,12 +25,7 @@ resource "aws_cloudfront_distribution" "distribution" {
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
-  # S3 Logging Configuration (Required by CloudFront)
-  logging_config {
-    bucket          = "${var.s3_bucket_name}-logs.s3.amazonaws.com"
-    include_cookies = true
-    prefix          = "cloudfront-logs/"
-  }
+  # NO logging_config block - logs will be manually added to CloudWatch Log Group
 
   restrictions {
     geo_restriction {
