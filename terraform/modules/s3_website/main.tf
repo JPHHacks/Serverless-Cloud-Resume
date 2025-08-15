@@ -37,10 +37,10 @@ resource "aws_s3_bucket_policy" "website" {
                 "Service": "cloudfront.amazonaws.com"
             },
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::jpheymannweb-prod/*",
+            "Resource": "${aws_s3_bucket.website_bucket.arn}/*",
             "Condition": {
                 "StringEquals": {
-                    "AWS:SourceArn": "arn:aws:cloudfront::222634359784:distribution/E18PUX4RRDTKVB"
+                    "AWS:SourceArn": var.cloudfront_distribution_arn
                 }
             }
         }

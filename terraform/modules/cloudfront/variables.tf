@@ -8,6 +8,11 @@ variable "s3_bucket_arn" {
   description = "The ARN of the S3 bucket for the website"
 }
 
+variable "s3_logs_bucket_arn" {
+  type        = string
+  description = "The ARN of the S3 bucket for CloudFront access logs"
+}
+
 variable "aliases" {
   type        = list(string)
   description = "List of aliases (domain names) for the CloudFront distribution"

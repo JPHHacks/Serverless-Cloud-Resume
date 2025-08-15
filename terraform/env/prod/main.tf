@@ -35,6 +35,7 @@ module "certificate_manager" {
   source         = "../../modules/cloudfront"
   s3_bucket_name = module.s3_website.bucket_name
   s3_bucket_arn  = module.s3_website.bucket_arn
+  s3_logs_bucket_arn = module.s3_website.logs_bucket_arn
   aliases        = [var.domain_name, "www.${var.domain_name}"]
   environment    = var.environment
   certificate_arn = module.certificate_manager.certificate_arn
