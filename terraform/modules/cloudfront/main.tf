@@ -26,9 +26,9 @@ resource "aws_cloudfront_distribution" "distribution" {
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"  # Managed CachingOptimized policy ID
   }
 
-  # CloudFront Access Logging
+  # CloudFront Access Logging - Use existing S3 bucket
   logging_config {
-    bucket          = aws_s3_bucket.access_logs.bucket
+    bucket          = "${var.s3_bucket_name}-logs"
     include_cookies = true
     prefix          = "cloudfront-logs/"
   }
@@ -48,88 +48,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   tags = {
     Environment = var.environment
   }
-
-  # Explicit dependencies to ensure S3 bucket and policies are created first
-  depends_on = [
-    aws_s3_bucket.access_logs,
-    aws_s3_bucket_region.access_logs,
-    aws_s3_bucket_server_side_encryption_configuration.access_logs_encryption,
-    aws_s3_bucket_policy.access_logs
-  ]
 }
-
-# S3 Bucket for CloudFront Access Logs
-resource "aws_s3_bucket" "access_logs" {
-  bucket        = "${var.s3_bucket_name}-access-logs"
-  force_destroy = false
-
-  tags = {
-    Environment = var.environment
-    Purpose     = "CloudFront access logs"
-  }
-}
-
-# S3 Bucket region configuration (required for CloudFront logs)
-resource "aws_s3_bucket_region" "access_logs" {
-  bucket = aws_s3_bucket.access_logs.id
-  region = "us-east-1"
-}
-
-# S3 Bucket encryption for access logs
-resource "aws_s3_bucket_server_side_encryption_configuration" "access_logs_encryption" {
-  bucket = aws_s3_bucket.access_logs.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
-# S3 Bucket policy for CloudFront access logs
-resource "aws_s3_bucket_policy" "access_logs" {
-  bucket = aws_s3_bucket.access_logs.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "CloudFrontLogDelivery"
-        Effect = "Allow"
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
-        }
-        Action = [
-          "s3:PutObject"
-        ]
-        Resource = "${aws_s3_bucket.access_logs.arn}/*"
-        Condition = {
-          StringEquals = {
-            "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/*"
-          }
-        }
-      },
-      {
-        Sid    = "CloudFrontLogDeliveryAcl"
-        Effect = "Allow"
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
-        }
-        Action = [
-          "s3:GetBucketAcl"
-        ]
-        Resource = aws_s3_bucket.access_logs.arn
-        Condition = {
-          StringEquals = {
-            "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/*"
-          }
-        }
-      }
-    ]
-  })
-}
-
-# Data source for current AWS account ID
-data "aws_caller_identity" "current" {}
 
 # Origin Access Control for S3
 resource "aws_cloudfront_origin_access_control" "default" {
