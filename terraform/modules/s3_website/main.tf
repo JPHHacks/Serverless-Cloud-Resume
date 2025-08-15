@@ -68,6 +68,12 @@ resource "aws_s3_bucket" "logs_bucket" {
   }
 }
 
+# Enable ACLs for CloudFront logging
+resource "aws_s3_bucket_acl" "logs_bucket_acl" {
+  bucket = aws_s3_bucket.logs_bucket.id
+  acl    = "log-delivery-write"
+}
+
 # S3 Bucket encryption for access logs
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs_bucket_encryption" {
   bucket = aws_s3_bucket.logs_bucket.id
@@ -117,6 +123,6 @@ resource "aws_s3_bucket_public_access_block" "logs_bucket" {
 
   block_public_acls       = true
   block_public_policy     = true
-  ignore_public_acls      = true
+  ignore_public_acls      = false  # Allow ACLs for CloudFront logging
   restrict_public_buckets = true
 }
