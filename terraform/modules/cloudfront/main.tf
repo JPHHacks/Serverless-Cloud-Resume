@@ -25,11 +25,11 @@ resource "aws_cloudfront_distribution" "distribution" {
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
-  # CloudWatch Logs v2 integration
+  # CloudWatch Logs v2 integration - no S3 logging
   logging_config {
-    bucket          = null  # Not using S3
+    bucket          = null
     include_cookies = true
-    prefix          = null  # Not using S3
+    prefix          = null
   }
 
   restrictions {
@@ -60,7 +60,7 @@ resource "aws_cloudwatch_log_group" "cloudfront_logs" {
   }
 }
 
-# CloudWatch Log Delivery Source for CloudFront
+# CloudWatch Log Delivery Source for CloudFront (v2)
 resource "aws_cloudwatch_log_delivery_source" "cloudfront" {
   name = "cloudfront-logs-${var.environment}"
   
@@ -72,7 +72,7 @@ resource "aws_cloudwatch_log_delivery_source" "cloudfront" {
   }
 }
 
-# CloudWatch Log Delivery for CloudFront
+# CloudWatch Log Delivery for CloudFront (v2)
 resource "aws_cloudwatch_log_delivery" "cloudfront" {
   name = "cloudfront-logs-${var.environment}"
   
