@@ -72,6 +72,16 @@ resource "aws_s3_bucket" "logs_bucket" {
 resource "aws_s3_bucket_acl" "logs_bucket_acl" {
   bucket = aws_s3_bucket.logs_bucket.id
   acl    = "log-delivery-write"
+  depends_on = [aws_s3_bucket_ownership_controls.logs_bucket]
+}
+
+# Enable ACL ownership controls for the logs bucket
+resource "aws_s3_bucket_ownership_controls" "logs_bucket" {
+  bucket = aws_s3_bucket.logs_bucket.id
+
+  rule {
+    object_ownership = "ObjectWriter"
+  }
 }
 
 # S3 Bucket encryption for access logs
@@ -125,4 +135,6 @@ resource "aws_s3_bucket_public_access_block" "logs_bucket" {
   block_public_policy     = true
   ignore_public_acls      = false  # Allow ACLs for CloudFront logging
   restrict_public_buckets = true
+
+  depends_on = [aws_s3_bucket_ownership_controls.logs_bucket]
 }
