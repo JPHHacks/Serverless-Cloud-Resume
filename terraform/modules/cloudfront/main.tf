@@ -1,4 +1,4 @@
-# CloudFront Distribution with CloudWatch Logs
+# CloudFront Distribution with CloudWatch Logs v2
 resource "aws_cloudfront_distribution" "distribution" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -25,11 +25,11 @@ resource "aws_cloudfront_distribution" "distribution" {
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
-  # CloudWatch Logs instead of S3
+  # CloudWatch Logs v2 integration
   logging_config {
-    bucket          = null  # Remove S3 bucket reference
+    bucket          = null  # Not using S3
     include_cookies = true
-    prefix          = null  # Remove S3 prefix
+    prefix          = null  # Not using S3
   }
 
   restrictions {
@@ -57,6 +57,34 @@ resource "aws_cloudwatch_log_group" "cloudfront_logs" {
   tags = {
     Environment = var.environment
     Purpose     = "CloudFront access logs"
+  }
+}
+
+# CloudWatch Log Delivery Source for CloudFront
+resource "aws_cloudwatch_log_delivery_source" "cloudfront" {
+  name = "cloudfront-logs-${var.environment}"
+  
+  log_delivery_source_type = "CloudFront"
+  
+  tags = {
+    Environment = var.environment
+    Purpose     = "CloudFront logs delivery source"
+  }
+}
+
+# CloudWatch Log Delivery for CloudFront
+resource "aws_cloudwatch_log_delivery" "cloudfront" {
+  name = "cloudfront-logs-${var.environment}"
+  
+  log_delivery_source_name = aws_cloudwatch_log_delivery_source.cloudfront.name
+  
+  log_group_name = aws_cloudwatch_log_group.cloudfront_logs.name
+  
+  log_type = "ACCESS_LOGS"
+  
+  tags = {
+    Environment = var.environment
+    Purpose     = "CloudFront access logs delivery"
   }
 }
 

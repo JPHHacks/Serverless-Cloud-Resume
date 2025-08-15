@@ -40,9 +40,44 @@ resource "aws_cloudwatch_dashboard" "security" {
         }
       },
       {
-        type   = "log"
+        type   = "metric"
         x      = 0
         y      = 6
+        width  = 12
+        height = 6
+
+        properties = {
+          metrics = [
+            ["AWS/CloudFront", "4XXError", "DistributionId", var.cloudfront_distribution_id],
+            [".", "5XXError", ".", "."]
+          ]
+          period = 300
+          stat   = "Sum"
+          region = "us-east-1"
+          title  = "HTTP Error Rates (Security Monitoring)"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 12
+        y      = 6
+        width  = 12
+        height = 6
+
+        properties = {
+          metrics = [
+            ["AWS/CloudFront", "Requests", "DistributionId", var.cloudfront_distribution_id]
+          ]
+          period = 300
+          stat   = "Sum"
+          region = "us-east-1"
+          title  = "Traffic Volume (DDoS Detection)"
+        }
+      },
+      {
+        type   = "log"
+        x      = 0
+        y      = 12
         width  = 24
         height = 6
 
@@ -118,21 +153,50 @@ resource "aws_cloudwatch_metric_alarm" "site_down" {
   }
 }
 
-# Cost Protection Alarm for CloudWatch Logs
-resource "aws_cloudwatch_metric_alarm" "logs_cost_protection" {
-  alarm_name          = "logs-cost-protection-${var.environment}"
+# Security Alarm - High 4XX Error Rate
+resource "aws_cloudwatch_metric_alarm" "high_4xx_errors" {
+  alarm_name          = "high-4xx-errors-${var.environment}"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  metric_name         = "IncomingLogEvents"
-  namespace           = "AWS/Logs"
-  period              = "86400"  # Daily
+  evaluation_periods  = "2"
+  metric_name         = "4XXError"
+  namespace           = "AWS/CloudFront"
+  period              = "300"
   statistic           = "Sum"
-  threshold           = "500000"  # Alert at 500K events/day
-  alarm_description   = "CloudWatch Logs usage approaching free tier limit"
+  threshold           = "20"
+  alarm_description   = "SECURITY ALERT: High 4XX error rate - potential scanning/attack"
   alarm_actions       = var.sns_topic_arn != null ? [var.sns_topic_arn] : []
+
+  dimensions = {
+    DistributionId = var.cloudfront_distribution_id
+    Region         = "Global"
+  }
 
   tags = {
     Environment = var.environment
-    Purpose     = "Cost protection"
+    Security    = "true"
+  }
+}
+
+# Security Alarm - Traffic Spike (DDoS Detection)
+resource "aws_cloudwatch_metric_alarm" "traffic_spike" {
+  alarm_name          = "traffic-spike-${var.environment}"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "Requests"
+  namespace           = "AWS/CloudFront"
+  period              = "300"
+  statistic           = "Sum"
+  threshold           = "1000"
+  alarm_description   = "SECURITY ALERT: Unusual traffic spike - potential DDoS"
+  alarm_actions       = var.sns_topic_arn != null ? [var.sns_topic_arn] : []
+
+  dimensions = {
+    DistributionId = var.cloudfront_distribution_id
+    Region         = "Global"
+  }
+
+  tags = {
+    Environment = var.environment
+    Security    = "true"
   }
 } 
