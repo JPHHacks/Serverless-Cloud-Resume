@@ -1,4 +1,4 @@
-# CloudFront Distribution
+# CloudFront Distribution with CloudWatch Logs
 resource "aws_cloudfront_distribution" "distribution" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -22,15 +22,14 @@ resource "aws_cloudfront_distribution" "distribution" {
     compress              = true
     viewer_protocol_policy = "redirect-to-https"
 
-    # Uses the AWS managed CachingOptimized policy
-    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"  # Managed CachingOptimized policy ID
+    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
-  # CloudFront Access Logging - Use existing S3 bucket
+  # CloudWatch Logs instead of S3
   logging_config {
-    bucket          = data.aws_s3_bucket.logs_bucket.bucket_domain_name
+    bucket          = null  # Remove S3 bucket reference
     include_cookies = true
-    prefix          = "cloudfront-logs/"
+    prefix          = null  # Remove S3 prefix
   }
 
   restrictions {
@@ -48,16 +47,17 @@ resource "aws_cloudfront_distribution" "distribution" {
   tags = {
     Environment = var.environment
   }
-
-  # Ensure S3 logs bucket exists before CloudFront tries to use it
-  depends_on = [
-    data.aws_s3_bucket.logs_bucket
-  ]
 }
 
-# Data source for S3 logs bucket
-data "aws_s3_bucket" "logs_bucket" {
-  bucket = "${var.s3_bucket_name}-logs"
+# CloudWatch Log Group for CloudFront
+resource "aws_cloudwatch_log_group" "cloudfront_logs" {
+  name              = "/aws/cloudfront/${var.environment}"
+  retention_in_days = 30
+
+  tags = {
+    Environment = var.environment
+    Purpose     = "CloudFront access logs"
+  }
 }
 
 # Origin Access Control for S3
