@@ -17,13 +17,3 @@ output "distribution_arn" {
   description = "CloudFront distribution ARN"
   value       = aws_cloudfront_distribution.distribution.arn
 }
-
-output "access_logs_bucket" {
-  description = "S3 bucket name for CloudFront access logs"
-  value       = aws_s3_bucket.access_logs.bucket
-}
-
-output "access_logs_bucket_arn" {
-  description = "S3 bucket ARN for CloudFront access logs"
-  value       = aws_s3_bucket.access_logs.arn
-}
