@@ -1,4 +1,4 @@
-# CloudFront Distribution with S3 Logging (Required for CloudFront)
+# CloudFront Distribution with CloudWatch Logs v2
 resource "aws_cloudfront_distribution" "distribution" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -25,12 +25,8 @@ resource "aws_cloudfront_distribution" "distribution" {
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
-  # S3 Logging Configuration (Required by CloudFront)
-  logging_config {
-    bucket          = "${var.s3_bucket_name}-logs.s3.amazonaws.com"
-    include_cookies = true
-    prefix          = "cloudfront-logs/"
-  }
+  # NO logging_config block - this enables v2 logging
+  # CloudFront v2 logging uses aws_cloudwatch_log_delivery resources instead
 
   restrictions {
     geo_restriction {
@@ -49,7 +45,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   }
 }
 
-# CloudWatch Log Group for CloudFront Logs (for manual log ingestion)
+# CloudWatch Log Group for CloudFront
 resource "aws_cloudwatch_log_group" "cloudfront_logs" {
   name              = "/aws/cloudfront/${var.environment}"
   retention_in_days = 30
@@ -57,6 +53,34 @@ resource "aws_cloudwatch_log_group" "cloudfront_logs" {
   tags = {
     Environment = var.environment
     Purpose     = "CloudFront access logs"
+  }
+}
+
+# CloudWatch Log Delivery Source for CloudFront (v2)
+resource "aws_cloudwatch_log_delivery_source" "cloudfront_logs" {
+  name         = "cloudwatch-access-logs-${var.environment}"
+  log_type     = "ACCESS_LOGS"
+  resource_arn = aws_cloudfront_distribution.distribution.arn
+}
+
+# CloudWatch Log Delivery Destination for CloudFront (v2)
+resource "aws_cloudwatch_log_delivery_destination" "cloudfront_log_dest" {
+  name           = "cloudfront-destination-logs-${var.environment}"
+  output_format  = "json"  # Use JSON for easier querying
+  
+  delivery_destination_configuration {
+    destination_resource_arn = aws_cloudwatch_log_group.cloudfront_logs.arn
+  }
+}
+
+# CloudWatch Log Delivery for CloudFront (v2)
+resource "aws_cloudwatch_log_delivery" "cloudfront_logs" {
+  delivery_source_name      = aws_cloudwatch_log_delivery_source.cloudfront_logs.name
+  delivery_destination_arn  = aws_cloudwatch_log_delivery_destination.cloudfront_log_dest.arn
+  
+  tags = {
+    Environment = var.environment
+    Purpose     = "CloudFront access logs delivery"
   }
 }
 
