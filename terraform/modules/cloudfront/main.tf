@@ -28,7 +28,7 @@ resource "aws_cloudfront_distribution" "distribution" {
 
   # CloudFront Access Logging - Use existing S3 bucket
   logging_config {
-    bucket          = "${var.s3_bucket_name}-logs"
+    bucket          = data.aws_s3_bucket.logs_bucket.bucket_domain_name
     include_cookies = true
     prefix          = "cloudfront-logs/"
   }
@@ -48,6 +48,16 @@ resource "aws_cloudfront_distribution" "distribution" {
   tags = {
     Environment = var.environment
   }
+
+  # Ensure S3 logs bucket exists before CloudFront tries to use it
+  depends_on = [
+    data.aws_s3_bucket.logs_bucket
+  ]
+}
+
+# Data source for S3 logs bucket
+data "aws_s3_bucket" "logs_bucket" {
+  bucket = "${var.s3_bucket_name}-logs"
 }
 
 # Origin Access Control for S3
