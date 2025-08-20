@@ -1,3 +1,8 @@
+# Data source to get CloudFront distribution details
+data "aws_cloudfront_distribution" "distribution" {
+  id = var.cloudfront_distribution_id
+}
+
 resource "aws_s3_bucket" "website_bucket" {
   bucket        = var.bucket_name
   force_destroy = false
@@ -40,7 +45,7 @@ resource "aws_s3_bucket_policy" "website" {
             "Resource": "${aws_s3_bucket.website_bucket.arn}/*",
             "Condition": {
                 "StringEquals": {
-                    "AWS:SourceArn": var.cloudfront_distribution_arn
+                    "AWS:SourceArn": data.aws_cloudfront_distribution.distribution.arn
                 }
             }
         }

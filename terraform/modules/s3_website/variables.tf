@@ -1,14 +1,14 @@
 variable "bucket_name" {
+  description = "Name of the S3 bucket"
   type        = string
-  description = "The name of the S3 bucket"
 }
 
 variable "environment" {
+  description = "Environment name"
   type        = string
-  description = "The environment (e.g., test, prod)"
 }
 
-variable "cloudfront_distribution_arn" {
+variable "cloudfront_distribution_id" {
+  description = "CloudFront distribution ID"
   type        = string
-  description = "The ARN of the CloudFront distribution"
 }

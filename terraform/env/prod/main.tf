@@ -7,7 +7,7 @@ module "s3_website" {
   source                     = "../../modules/s3_website"
   bucket_name                = var.bucket_name
   environment                = var.environment
-  cloudfront_distribution_arn = module.cloudfront.distribution_arn
+  cloudfront_distribution_id = module.cloudfront.distribution_id
 }
 
 # Route53 Module
@@ -34,6 +34,7 @@ module "certificate_manager" {
   module "cloudfront" {
   source         = "../../modules/cloudfront"
   s3_bucket_name = module.s3_website.bucket_name
+  s3_bucket_domain_name = module.s3_website.bucket_domain_name
   s3_bucket_arn  = module.s3_website.bucket_arn
   aliases        = [var.domain_name, "www.${var.domain_name}"]
   environment    = var.environment
@@ -46,6 +47,14 @@ module "lambda_function" {
   function_name = var.lambda_function_name
   environment   = var.environment
   api_gateway_execution_arn = module.api_gateway.api_gateway_execution_arn
+}
+
+# Security Remediation Lambda Module
+module "security_remediation" {
+  source        = "../../modules/lambda"
+  function_name = "security-remediation-${var.environment}"
+  environment   = var.environment
+  api_gateway_execution_arn = null  # Not needed for security remediation
 }
 
 # DynamoDB Module
@@ -76,4 +85,19 @@ module "sns" {
   source        = "../../modules/sns"
   environment   = var.environment
   email_address = var.notification_email
+}
+
+# EventBridge Module for Security Remediation
+module "eventbridge" {
+  source                = "../../modules/eventbridge"
+  environment           = var.environment
+  lambda_function_arn   = module.security_remediation.invoke_arn
+  lambda_function_name  = module.security_remediation.function_name
+}
+
+# CloudTrail Module
+module "cloudtrail" {
+  source        = "../../modules/cloudtrail"
+  environment   = var.environment
+  s3_bucket_name = "${var.bucket_name}-cloudtrail-logs"
 }

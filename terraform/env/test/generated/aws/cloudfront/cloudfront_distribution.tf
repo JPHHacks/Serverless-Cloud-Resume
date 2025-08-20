@@ -23,7 +23,6 @@ resource "aws_cloudfront_distribution" "tfer--E2QAT2VZ0RDLHY" {
     connection_attempts      = "3"
     connection_timeout       = "10"
     domain_name              = "jpheymannweb.s3.us-east-1.amazonaws.com"
-    origin_access_control_id = "E35V8H99TSW38W"
     origin_id                = "jpheymannweb.s3.us-east-1.amazonaws.com"
   }
 
