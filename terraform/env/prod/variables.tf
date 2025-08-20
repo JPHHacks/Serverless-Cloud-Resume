@@ -33,9 +33,3 @@ variable "route53_zone_name" {
   type        = string
   default     = "jpheymann.cloud"
 }
-
-variable "notification_email" {
-  description = "Email address for CloudWatch alarm notifications"
-  type        = string
-  default     = "jpheymann@protonmail.com"
-}

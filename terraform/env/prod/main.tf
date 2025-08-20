@@ -49,14 +49,6 @@ module "lambda_function" {
   api_gateway_execution_arn = module.api_gateway.api_gateway_execution_arn
 }
 
-# Security Remediation Lambda Module
-module "security_remediation" {
-  source        = "../../modules/lambda"
-  function_name = "security-remediation-${var.environment}"
-  environment   = var.environment
-  api_gateway_execution_arn = null  # Not needed for security remediation
-}
-
 # DynamoDB Module
 module "dynamodb" {
   source      = "../../modules/dynamodb"
@@ -70,34 +62,4 @@ module "api_gateway" {
   environment          = var.environment
   lambda_function_name = module.lambda_function.function_name
   lambda_invoke_arn    = module.lambda_function.invoke_arn
-}
-
-# CloudWatch Module 
-module "cloudwatch" {
-  source                     = "../../modules/cloudwatch"
-  environment                = var.environment
-  cloudfront_distribution_id = module.cloudfront.distribution_id
-  sns_topic_arn             = module.sns.topic_arn
-}
-
-# SNS Module 
-module "sns" {
-  source        = "../../modules/sns"
-  environment   = var.environment
-  email_address = var.notification_email
-}
-
-# EventBridge Module for Security Remediation
-module "eventbridge" {
-  source                = "../../modules/eventbridge"
-  environment           = var.environment
-  lambda_function_arn   = module.security_remediation.invoke_arn
-  lambda_function_name  = module.security_remediation.function_name
-}
-
-# CloudTrail Module
-module "cloudtrail" {
-  source        = "../../modules/cloudtrail"
-  environment   = var.environment
-  s3_bucket_name = "${var.bucket_name}-cloudtrail-logs"
 }
